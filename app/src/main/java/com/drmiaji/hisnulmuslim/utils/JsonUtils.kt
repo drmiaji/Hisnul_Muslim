@@ -1,7 +1,7 @@
-package com.drmiaji.fortyahadith.utils
+package com.drmiaji.hisnulmuslim.utils
 
 import android.content.Context
-import com.drmiaji.fortyahadith.data.Hadith
+import com.drmiaji.hisnulmuslim.data.Hadith
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 

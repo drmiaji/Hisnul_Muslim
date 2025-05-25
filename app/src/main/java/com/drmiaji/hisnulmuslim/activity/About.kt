@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.activity
+package com.drmiaji.hisnulmuslim.activity
 
 import android.content.Intent
 import android.graphics.Typeface
@@ -13,8 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
-import com.drmiaji.fortyahadith.R
-import com.drmiaji.fortyahadith.ui.theme.FontManager
+import com.drmiaji.hisnulmuslim.R
+import com.drmiaji.hisnulmuslim.ui.theme.FontManager
 import com.google.android.material.appbar.MaterialToolbar
 
 class About : AppCompatActivity() {

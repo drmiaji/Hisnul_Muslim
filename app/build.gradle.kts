@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.drmiaji.fortyahadith"
+    namespace = "com.drmiaji.hisnulmuslim"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.drmiaji.fortyahadith"
+        applicationId = "com.drmiaji.hisnulmuslim"
         minSdk = 24
         targetSdk = 35
         versionCode = 11

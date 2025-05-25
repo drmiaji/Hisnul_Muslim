@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.data
+package com.drmiaji.hisnulmuslim.data
 
 data class Hadith(
     val id: Int,

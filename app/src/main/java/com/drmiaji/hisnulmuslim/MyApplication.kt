@@ -1,7 +1,7 @@
-package com.drmiaji.fortyahadith
+package com.drmiaji.hisnulmuslim
 
 import android.app.Application
-import com.drmiaji.fortyahadith.utils.ThemeUtils
+import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 
 class MyApplication : Application() {
     override fun onCreate() {

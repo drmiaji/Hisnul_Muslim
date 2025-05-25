@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.utils
+package com.drmiaji.hisnulmuslim.utils
 
 import android.content.Context
 import android.graphics.Typeface
@@ -7,7 +7,7 @@ import android.text.SpannableString
 import android.text.style.BackgroundColorSpan
 import android.text.style.StyleSpan
 import androidx.core.content.ContextCompat
-import com.drmiaji.fortyahadith.R
+import com.drmiaji.hisnulmuslim.R
 
 class HighlightSpanBuilder(private val context: Context) {
     fun getHighlightedText(text: String, searchTerm: String): SpannableString {

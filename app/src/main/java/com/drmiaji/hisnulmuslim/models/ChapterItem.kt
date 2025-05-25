@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.models
+package com.drmiaji.hisnulmuslim.models
 
 data class ChapterItem(
     val title: String,

@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.adapter
+package com.drmiaji.hisnulmuslim.adapter
 
 import android.graphics.Color
 import android.graphics.Typeface
@@ -11,9 +11,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.drmiaji.fortyahadith.data.Hadith
-import com.drmiaji.fortyahadith.databinding.ItemChapterBinding
-import com.drmiaji.fortyahadith.utils.HadithDiffCallback
+import com.drmiaji.hisnulmuslim.data.Hadith
+import com.drmiaji.hisnulmuslim.databinding.ItemChapterBinding
+import com.drmiaji.hisnulmuslim.utils.HadithDiffCallback
 
 class HadithAdapter(
     private var items: List<Hadith>,

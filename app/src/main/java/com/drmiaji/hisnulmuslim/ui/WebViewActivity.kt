@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.ui
+package com.drmiaji.hisnulmuslim.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -18,13 +18,13 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
-import com.drmiaji.fortyahadith.R
-import com.drmiaji.fortyahadith.activity.About
-import com.drmiaji.fortyahadith.activity.BaseActivity
-import com.drmiaji.fortyahadith.activity.SettingsActivity
-import com.drmiaji.fortyahadith.data.Hadith
-import com.drmiaji.fortyahadith.utils.ThemeUtils
-import com.drmiaji.fortyahadith.utils.loadHadiths
+import com.drmiaji.hisnulmuslim.R
+import com.drmiaji.hisnulmuslim.activity.About
+import com.drmiaji.hisnulmuslim.activity.BaseActivity
+import com.drmiaji.hisnulmuslim.activity.SettingsActivity
+import com.drmiaji.hisnulmuslim.data.Hadith
+import com.drmiaji.hisnulmuslim.utils.ThemeUtils
+import com.drmiaji.hisnulmuslim.utils.loadHadiths
 import kotlin.math.abs
 
 class WebViewActivity : BaseActivity() {

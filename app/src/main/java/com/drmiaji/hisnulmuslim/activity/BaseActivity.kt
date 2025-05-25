@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.activity
+package com.drmiaji.hisnulmuslim.activity
 
 import android.os.Bundle
 import android.view.View
@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import com.drmiaji.fortyahadith.R
+import com.drmiaji.hisnulmuslim.R
 import com.google.android.material.snackbar.Snackbar
 
 @Suppress("DEPRECATION")

@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.activity
+package com.drmiaji.hisnulmuslim.activity
 
 import android.os.Bundle
 import android.view.MenuItem
@@ -6,9 +6,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import com.drmiaji.fortyahadith.R
-import com.drmiaji.fortyahadith.utils.SettingsFragment
-import com.drmiaji.fortyahadith.utils.ThemeUtils
+import com.drmiaji.hisnulmuslim.R
+import com.drmiaji.hisnulmuslim.utils.SettingsFragment
+import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 import com.google.android.material.appbar.MaterialToolbar
 
 class SettingsActivity : AppCompatActivity() {

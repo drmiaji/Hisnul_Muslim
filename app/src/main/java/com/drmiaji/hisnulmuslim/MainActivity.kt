@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith
+package com.drmiaji.hisnulmuslim
 
 import android.app.Activity
 import android.content.Intent
@@ -83,15 +83,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.drmiaji.fortyahadith.activity.About
-import com.drmiaji.fortyahadith.activity.SettingsActivity
-import com.drmiaji.fortyahadith.ui.ChapterListActivity
-import com.drmiaji.fortyahadith.ui.WebViewActivity
-import com.drmiaji.fortyahadith.ui.theme.MyAppTheme
-import com.drmiaji.fortyahadith.ui.theme.topBarColors
+import com.drmiaji.hisnulmuslim.activity.About
+import com.drmiaji.hisnulmuslim.activity.SettingsActivity
+import com.drmiaji.hisnulmuslim.ui.ChapterListActivity
+import com.drmiaji.hisnulmuslim.ui.WebViewActivity
+import com.drmiaji.hisnulmuslim.ui.theme.MyAppTheme
+import com.drmiaji.hisnulmuslim.ui.theme.topBarColors
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
-import com.drmiaji.fortyahadith.ui.theme.FontManager
+import com.drmiaji.hisnulmuslim.ui.theme.FontManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

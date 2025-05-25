@@ -1,7 +1,7 @@
-package com.drmiaji.fortyahadith.utils
+package com.drmiaji.hisnulmuslim.utils
 
 import androidx.recyclerview.widget.DiffUtil
-import com.drmiaji.fortyahadith.data.Hadith
+import com.drmiaji.hisnulmuslim.data.Hadith
 
 class HadithDiffCallback(
     private val oldList: List<Hadith>,

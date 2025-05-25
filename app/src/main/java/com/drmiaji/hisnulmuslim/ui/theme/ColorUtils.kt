@@ -1,4 +1,4 @@
-package com.drmiaji.fortyahadith.ui.theme
+package com.drmiaji.hisnulmuslim.ui.theme
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
