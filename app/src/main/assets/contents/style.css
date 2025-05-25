@@ -1,0 +1,265 @@
+.top-button {
+    padding: 8px 14px;
+    font-size: 16px;
+    font-family: 'Solaimanlipi';
+    border: 1px solid #ccc; /* light gray border */
+    border-radius: 6px;
+    background-color: #f9f9f9; /* very light background */
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.top-button:hover {
+    background-color: #eaeaea; /* slightly darker on hover */
+    border-color: #bbb; /* slightly darker border on hover */
+}
+
+body.show-transliteration .transliteration {
+    display: block;
+}
+
+/* ========== FONT DECLARATIONS ========== */
+@font-face {
+    font-family: 'Solaimanlipi';
+    src: url('../fonts/solaimanlipi.ttf') format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'quran-arabic';
+    src: url('../fonts/indopak.ttf') format('truetype');
+    font-display: swap;
+}
+
+/* ========== LIGHT MODE (DEFAULT) ========== */
+html, body {
+    margin: 0;
+    padding: 16px;
+    font-family: 'Solaimanlipi', 'Segoe UI', 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #ffffff;
+    color: #111111;
+    text-align: justify;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ========== HEADINGS - LIGHT MODE ========== */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    color: #006400;
+    margin: 16px 0 8px;
+    direction: ltr;
+    text-align: left;
+    font-size: 20px; /* ✅ Add this line */
+}
+
+/* ========== TEXT - LIGHT MODE ========== */
+p {
+    margin: 12px 0;
+    font-size: 16px;
+}
+
+.arabic {
+    font-family: 'quran-arabic', serif;
+    font-size: 22px;
+    color: #000000;
+    direction: rtl;
+    text-align: justify;
+    line-height: 1.8;
+    margin: 16px 0;
+}
+
+.bangla {
+    font-size: 16px;
+    color: #111111;
+    direction: ltr;
+    text-align: justify;
+    margin: 10px 0 20px 0;
+}
+
+.transliteration {
+    display: none;
+    font-size: 16px;
+    color: #666666;
+    font-style: italic;
+    margin: 8px 0;
+}
+
+.translation {
+    font-size: 16px;
+    color: #111111;
+    margin: 12px 0;
+}
+
+.reference {
+    font-size: 14px;
+    color: #888888;
+    margin: 8px 0;
+    font-weight: bold;
+}
+
+.highlight {
+    font-weight: bold;
+    color: #b22222;
+}
+
+sup {
+    font-size: 12px;
+    vertical-align: super;
+    font-weight: bold;
+}
+
+/* ========== QUOTES - LIGHT MODE ========== */
+blockquote {
+    font-size: 16px;
+    padding: 10px 16px;
+    margin: 12px 0;
+    background-color: #f5f5f5;
+    border-left: 4px solid #006400;
+}
+
+.bangla-quote {
+    font-size: 16px;
+    background-color: #f1f8e9;
+    color: #111111;
+    border-left: 4px solid #008B5B;
+    padding: 10px 16px;
+    margin: 12px 0;
+    border-radius: 6px;
+}
+
+/* ========== LINKS - LIGHT MODE ========== */
+.toc a {
+    color: #0047AB;
+    text-decoration: none;
+}
+
+/* ========== BUTTONS - LIGHT MODE ========== */
+#goTopBtn {
+    position: fixed;
+    bottom: 32px;
+    right: 24px;
+    z-index: 1000;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 50%;
+    background: #0047ab;
+    color: #ffffff;
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    display: none;
+}
+
+#themeToggle {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1001;
+    padding: 12px 20px;
+    border-radius: 8px;
+    background: #0047ab;
+    color: #ffffff;
+    border: 2px solid #0047ab;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: Arial, sans-serif;
+}
+
+#themeToggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* ==================== DARK MODE ==================== */
+html.dark body {
+    background-color: #151515 !important;
+    color: #cccccc !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+    color: #90ee90 !important;
+}
+
+html.dark .arabic {
+    color: #dddddd !important;
+}
+
+html.dark .bangla {
+    color: #cccccc !important;
+}
+
+html.dark .transliteration {
+    color: #aaaaaa !important;
+}
+
+html.dark .translation {
+    color: #cccccc !important;
+}
+
+html.dark .reference {
+    color: #999999 !important;
+}
+
+html.dark .highlight {
+    color: #ff7f7f !important;
+}
+
+html.dark blockquote {
+    background-color: #202020 !important;
+    border-left-color: #90ee90 !important;
+    color: #cccccc !important;
+}
+
+html.dark .bangla-quote {
+    background-color: #2f402f !important;
+    color: #cccccc !important;
+    border-left-color: #90ee90 !important;
+}
+
+html.dark .toc a {
+    color: #90caf9 !important;
+    text-decoration: underline;
+}
+
+html.dark #goTopBtn {
+    background: #90caf9 !important;
+    color: #101010 !important;
+}
+
+html.dark #themeToggle {
+    background: #90caf9 !important;
+    color: #101010 !important;
+    border-color: #90caf9 !important;
+}
+
+/* ========== HORIZONTAL RULE ========== */
+hr {
+    margin: 20px 0;
+    border: 1px solid #ddd;
+}
+
+html.dark hr {
+    border-color: #444 !important;
+}
+html.dark .top-button {
+    background-color: #1f1f1f;
+    color: #e0e0e0;
+    border: 1px solid #333;
+}
+
+html.dark .top-button:hover {
+    background-color: #2c2c2c;
+    border-color: #555;
+    color: #ffffff;
+}
