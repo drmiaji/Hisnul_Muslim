@@ -1,5 +1,6 @@
 package com.drmiaji.hisnulmuslim.data.entities
 
+import androidx.annotation.NonNull
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
@@ -19,14 +20,18 @@ import androidx.room.Index
         Index(value = ["dua_global_id"], unique = true) // ✅ Add this line
     ]
 )
+
 data class DuaName(
     @PrimaryKey
-    val ID: Int,
-    val dua_global_id: String,
-    val chap_id: Int,
-    val dua_id: Int,
-    val chapname: String,
-    val duaname: String,
-    val tags: String?,
-    val category: Int
+    @NonNull
+    val ID: String, // Remove the nullable type (String?)
+
+    val book_id: Int?,
+    val category: String?,
+    val chap_id: Int?,
+    val chapname: String?,
+    val dua_global_id: Int?,
+    val dua_id: String?,
+    val duaname: String?,
+    val tags: String?
 )

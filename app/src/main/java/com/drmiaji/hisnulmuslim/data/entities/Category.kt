@@ -5,6 +5,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "category")
 data class Category(
-    @PrimaryKey val id: Int,
-    val name: String
+    @PrimaryKey val id: Int,    // non-nullable Int
+    val name: String            // non-nullable String
 )
