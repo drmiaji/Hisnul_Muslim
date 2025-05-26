@@ -6,15 +6,18 @@ import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
 import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 
 class MyApplication : Application() {
+
+    lateinit var repository: HisnulMuslimRepository
+
     override fun onCreate() {
         super.onCreate()
         ThemeUtils.applyTheme(this)
-    }
 
-    val database = HisnulMuslimDatabase.getDatabase(this)
-    val repository = HisnulMuslimRepository(
-        database.categoryDao(),
-        database.duaNameDao(),
-        database.duaDetailDao()
-    )
+        val database = HisnulMuslimDatabase.getDatabase(this)
+        repository = HisnulMuslimRepository(
+            database.categoryDao(),
+            database.duaNameDao(),
+            database.duaDetailDao()
+        )
+    }
 }

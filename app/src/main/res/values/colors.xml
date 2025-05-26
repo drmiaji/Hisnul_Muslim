@@ -37,4 +37,9 @@
     <color name="chapter_bg_color">#f5f7fa</color> <!-- very light blue/gray, not pure white -->
     <color name="chapter_text_color">#222831</color> <!-- dark gray, not pure black -->
     <color name="divider_color">#b0bec5</color> <!-- muted gray-blue for dividers -->
+
+    <color name="search_highlight">#FFFF00</color>
+    <color name="primary_text">#212121</color>
+    <color name="secondary_text">#757575</color>
+    <color name="primary_color">#2196F3</color>
 </resources>

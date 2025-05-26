@@ -1,79 +1,54 @@
 package com.drmiaji.hisnulmuslim.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Typeface
 import android.os.Bundle
-import android.view.GestureDetector
 import android.view.Menu
 import android.view.MenuItem
-import android.view.MotionEvent
-import android.view.View
 import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.drmiaji.hisnulmuslim.R
 import com.drmiaji.hisnulmuslim.activity.About
 import com.drmiaji.hisnulmuslim.activity.BaseActivity
 import com.drmiaji.hisnulmuslim.activity.SettingsActivity
-import com.drmiaji.hisnulmuslim.data.Hadith
-import com.drmiaji.hisnulmuslim.utils.ThemeUtils
-import com.drmiaji.hisnulmuslim.utils.loadHadiths
-import kotlin.math.abs
+import com.drmiaji.hisnulmuslim.data.database.HisnulMuslimDatabase
+import com.drmiaji.hisnulmuslim.data.entities.DuaDetail
+import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
+import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.launch
 
 class WebViewActivity : BaseActivity() {
+    private lateinit var repository: HisnulMuslimRepository
+    private lateinit var webView: WebView
+    private var duaGlobalId: String? = null
 
     override fun getLayoutResource() = R.layout.activity_webview
-    private lateinit var webView: WebView
-    private var currentIndex = 0
-    private lateinit var chapters: List<Hadith>
-    private var currentThemeMode = ""
 
-    private val gestureDetector by lazy {
-        GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onFling(
-                e1: MotionEvent?,
-                e2: MotionEvent,
-                velocityX: Float,
-                velocityY: Float
-            ): Boolean {
-                if (e1 == null) return false
-                val diffX = e2.x - e1.x
-                val diffY = e2.y - e1.y
-                if (abs(diffX) > abs(diffY) && abs(diffX) > 100 && abs(velocityX) > 100) {
-                    if (diffX > 0) loadPreviousChapter()
-                    else loadNextChapter()
-                    return true
-                }
-                return false
-            }
-        })
-    }
-
-    @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
     override fun onActivityReady(savedInstanceState: Bundle?) {
-        currentThemeMode = ThemeUtils.getCurrentThemeMode(this)
         setupToolbar()
+        setupDatabase()
         setupWebView()
-        loadInitialContent()
+        loadDuaContent()
     }
 
     private fun setupToolbar() {
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        val titleTextView = findViewById<TextView>(R.id.toolbar_title)
+
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            title = intent.getStringExtra("title") ?: "Reading"
-        }
+        val title = intent.getStringExtra("title") ?: getString(R.string.app_name)
+        titleTextView.text = title
 
-        setCustomFontToTitle(toolbar)
+        val typeface = Typeface.createFromAsset(assets, "fonts/solaimanlipi.ttf")
+        titleTextView.typeface = typeface
+
         val iconColor = ContextCompat.getColor(this, R.color.toolbar_icon_color)
         toolbar.navigationIcon?.let { drawable ->
             val wrapped = DrawableCompat.wrap(drawable).mutate()
@@ -82,154 +57,197 @@ class WebViewActivity : BaseActivity() {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility", "SetJavaScriptEnabled")
-    private fun setupWebView() {
-        webView = findViewById(R.id.webview)
-        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
-
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                progressBar?.visibility = View.VISIBLE
-            }
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                progressBar?.visibility = View.GONE
-            }
-        }
-
-        webView.settings.apply {
-            javaScriptEnabled = true
-            useWideViewPort = true
-            loadWithOverviewMode = true
-            builtInZoomControls = true
-            displayZoomControls = false
-            textZoom = 110
-            domStorageEnabled = true
-            allowFileAccess = true
-            allowContentAccess = true
-        }
-
-        webView.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
-    }
-
-    private fun loadInitialContent() {
-        val externalUrl = intent.getStringExtra("url")
-        val hadithId = intent.getIntExtra("hadith_id", -1)
-
-        when {
-            externalUrl != null -> webView.loadUrl(externalUrl)
-            hadithId != -1 -> loadHadithContent(hadithId)
-            else -> loadHtmlContent()
-        }
-    }
-
-    private fun loadHadithContent(hadithId: Int) {
-        chapters = loadHadiths(this)
-        currentIndex = chapters.indexOfFirst { it.id == hadithId }.takeIf { it >= 0 } ?: 0
-
-        if (chapters.isNotEmpty() && currentIndex in chapters.indices) {
-            loadCurrentChapter()
-        } else {
-            webView.loadData("<h2>Hadith not found</h2>", "text/html", "utf-8")
-        }
-    }
-
-    private fun loadHtmlContent() {
-        val fileName = intent.getStringExtra("fileName") ?: "chapter1.html"
-        val themeClass = getCurrentThemeClass()
-
-        val baseHtml = assets.open("contents/base.html").bufferedReader().use { it.readText() }
-        val contentHtml = assets.open("contents/topics/$fileName").bufferedReader().use { it.readText() }
-        val fullHtml = baseHtml
-            .replace("{{CONTENT}}", contentHtml)
-            .replace("{{THEME}}", themeClass)
-            .replace("{{STYLE}}", "")
-
-        webView.loadDataWithBaseURL(
-            "file:///android_asset/contents/",
-            fullHtml,
-            "text/html",
-            "utf-8",
-            null
+    private fun setupDatabase() {
+        val database = HisnulMuslimDatabase.getDatabase(this)
+        repository = HisnulMuslimRepository(
+            database.categoryDao(),
+            database.duaNameDao(),
+            database.duaDetailDao()
         )
     }
 
-    private fun loadCurrentChapter() {
-        if (chapters.isNotEmpty() && currentIndex in chapters.indices) {
-            val hadith = chapters[currentIndex]
-            val themeClass = getCurrentThemeClass()
-
-            val baseHtml = assets.open("contents/base.html").bufferedReader().use { it.readText() }
-            val contentHtml = """
-                <h2>${hadith.title}</h2>
-                <div class="arabic">${hadith.arabic}</div>
-                <div class="transliteration">${hadith.transliteration}</div>
-                <div class="translation">${hadith.translation}</div>
-                <div class="reference">${hadith.reference}</div>
-            """.trimIndent()
-
-            val fullHtml = baseHtml
-                .replace("{{CONTENT}}", contentHtml)
-                .replace("{{THEME}}", themeClass)
-                .replace("{{STYLE}}", "")
-
-            webView.loadDataWithBaseURL(
-                "file:///android_asset/contents/",
-                fullHtml,
-                "text/html",
-                "utf-8",
-                null
-            )
+    private fun setupWebView() {
+        webView = findViewById(R.id.webview)
+        webView.settings.apply {
+            javaScriptEnabled = false
+            allowFileAccess = false
+            allowContentAccess = false
+            setSupportZoom(true)
+            builtInZoomControls = true
+            displayZoomControls = false
         }
     }
 
-    private fun getCurrentThemeClass(): String {
-        return when (ThemeUtils.getCurrentThemeMode(this)) {
-            ThemeUtils.THEME_DARK -> "dark"
-            ThemeUtils.THEME_LIGHT -> "light"
-            else -> {
-                val nightModeFlags = resources.configuration.uiMode and
-                        android.content.res.Configuration.UI_MODE_NIGHT_MASK
-                if (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES)
-                    "dark" else "light"
+    private fun loadDuaContent() {
+        duaGlobalId = intent.getStringExtra("duaGlobalId")
+        val chapterName = intent.getStringExtra("chapter_name") ?: ""
+
+        duaGlobalId?.let { globalId ->
+            lifecycleScope.launch {
+                try {
+                    repository.getDuaDetailsByGlobalId(globalId).collect { duaDetails ->
+                        if (duaDetails.isNotEmpty()) {
+                            val htmlContent = generateHtmlContent(duaDetails, chapterName)
+                            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                        } else {
+                            showErrorMessage("No content found for this dua.")
+                        }
+                    }
+                } catch (e: Exception) {
+                    showErrorMessage("Error loading dua content: ${e.message}")
+                }
             }
-        }
+        } ?: showErrorMessage("Invalid dua id")
     }
 
-    override fun onResume() {
-        super.onResume()
-        val newThemeMode = ThemeUtils.getCurrentThemeMode(this)
-        if (newThemeMode != currentThemeMode) {
-            currentThemeMode = newThemeMode
-            recreate()
-        }
-    }
+    private fun generateHtmlContent(duaDetails: List<DuaDetail>, chapterName: String): String {
+        val htmlBuilder = StringBuilder()
 
-    // Rest of the methods remain unchanged...
-    private fun loadPreviousChapter() {
-        if (currentIndex > 0) {
-            currentIndex--
-            loadCurrentChapter()
-        }
-    }
+        htmlBuilder.append("""
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body {
+                        font-family: 'Arial', sans-serif;
+                        margin: 16px;
+                        line-height: 1.6;
+                        background-color: #f5f5f5;
+                    }
+                    .dua-container {
+                        background: white;
+                        border-radius: 8px;
+                        padding: 16px;
+                        margin-bottom: 16px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .chapter-title {
+                        color: #2196F3;
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin-bottom: 16px;
+                        text-align: center;
+                    }
+                    .top-text, .bottom-text {
+                        color: #666;
+                        font-size: 14px;
+                        margin: 8px 0;
+                        font-style: italic;
+                    }
+                    .arabic {
+                        font-size: 24px;
+                        text-align: right;
+                        direction: rtl;
+                        margin: 16px 0;
+                        line-height: 2;
+                        color: #333;
+                    }
+                    .transliteration {
+                        font-size: 16px;
+                        color: #444;
+                        margin: 12px 0;
+                        font-style: italic;
+                    }
+                    .translation {
+                        font-size: 16px;
+                        color: #333;
+                        margin: 12px 0;
+                    }
+                    .reference {
+                        font-size: 12px;
+                        color: #888;
+                        margin-top: 12px;
+                        border-top: 1px solid #eee;
+                        padding-top: 8px;
+                    }
+                    .segment {
+                        margin-bottom: 24px;
+                        border-bottom: 1px solid #eee;
+                        padding-bottom: 16px;
+                    }
+                    .segment:last-child {
+                        border-bottom: none;
+                    }
+                </style>
+            </head>
+            <body>
+        """)
 
-    private fun loadNextChapter() {
-        if (chapters.isNotEmpty() && currentIndex < chapters.size - 1) {
-            currentIndex++
-            loadCurrentChapter()
+        if (chapterName.isNotEmpty()) {
+            htmlBuilder.append("<div class='chapter-title'>$chapterName</div>")
         }
-    }
 
-    private fun setCustomFontToTitle(toolbar: Toolbar) {
-        for (i in 0 until toolbar.childCount) {
-            val view = toolbar.getChildAt(i)
-            if (view is TextView && view.text == toolbar.title) {
-                val typeface = Typeface.createFromAsset(assets, "fonts/solaimanlipi.ttf")
-                view.typeface = typeface
-                break
+        duaDetails.sortedBy { it.dua_segment_id }.forEach { detail ->
+            htmlBuilder.append("<div class='dua-container'>")
+            htmlBuilder.append("<div class='segment'>")
+
+            // Top text
+            detail.top?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='top-text'>$it</div>")
             }
+
+            // Arabic text
+            detail.arabic?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='arabic'>$it</div>")
+            }
+
+            // Transliteration
+            detail.transliteration?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='transliteration'>$it</div>")
+            }
+
+            // Translation
+            detail.translations?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='translation'>$it</div>")
+            }
+
+            // Bottom text
+            detail.bottom?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='bottom-text'>$it</div>")
+            }
+
+            // Reference
+            detail.reference?.takeIf { it.isNotBlank() }?.let {
+                htmlBuilder.append("<div class='reference'>Reference: $it</div>")
+            }
+
+            htmlBuilder.append("</div>")
+            htmlBuilder.append("</div>")
         }
+
+        htmlBuilder.append("""
+            </body>
+            </html>
+        """)
+
+        return htmlBuilder.toString()
+    }
+
+    private fun showErrorMessage(message: String) {
+        val errorHtml = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { 
+                        font-family: Arial; 
+                        padding: 20px; 
+                        text-align: center; 
+                        color: #666; 
+                    }
+                </style>
+            </head>
+            <body>
+                <h3>Error</h3>
+                <p>$message</p>
+            </body>
+            </html>
+        """
+        webView.loadDataWithBaseURL(null, errorHtml, "text/html", "UTF-8", null)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

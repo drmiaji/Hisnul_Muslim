@@ -1,40 +1,47 @@
 package com.drmiaji.hisnulmuslim.ui
 
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
-import androidx.core.view.get
-import androidx.core.view.size
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.drmiaji.hisnulmuslim.R
 import com.drmiaji.hisnulmuslim.activity.About
 import com.drmiaji.hisnulmuslim.activity.BaseActivity
 import com.drmiaji.hisnulmuslim.activity.SettingsActivity
-import com.drmiaji.hisnulmuslim.adapter.HadithAdapter
-import com.drmiaji.hisnulmuslim.data.Hadith
-import com.drmiaji.hisnulmuslim.utils.loadHadiths
+import com.drmiaji.hisnulmuslim.adapter.DuaAdapter
+import com.drmiaji.hisnulmuslim.data.database.HisnulMuslimDatabase
+import com.drmiaji.hisnulmuslim.data.entities.DuaName
+import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.launch
 
 
 class ChapterListActivity : BaseActivity() {
-    private lateinit var adapter: HadithAdapter
-    private var allHadiths: List<Hadith> = emptyList()
+    private lateinit var adapter: DuaAdapter
+    private lateinit var repository: HisnulMuslimRepository
+    private var allDuaNames: List<DuaName> = emptyList()
 
     override fun getLayoutResource() = R.layout.activity_chapter_list
 
     override fun onActivityReady(savedInstanceState: Bundle?) {
+        setupToolbar()
+        setupDatabase()
+        setupRecyclerView()
+        loadDuaNames()
+    }
+
+    private fun setupToolbar() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         val titleTextView = findViewById<TextView>(R.id.toolbar_title)
-        allHadiths = loadHadiths(this)
 
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -50,52 +57,78 @@ class ChapterListActivity : BaseActivity() {
             DrawableCompat.setTint(wrapped, iconColor)
             toolbar.navigationIcon = wrapped
         }
+    }
 
+    private fun setupDatabase() {
+        val database = HisnulMuslimDatabase.getDatabase(this)
+        repository = HisnulMuslimRepository(
+            database.categoryDao(),
+            database.duaNameDao(),
+            database.duaDetailDao()
+        )
+    }
+
+    private fun setupRecyclerView() {
         val recyclerView = findViewById<RecyclerView>(R.id.chapter_recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = HadithAdapter(allHadiths) { hadith ->
+        adapter = DuaAdapter(emptyList()) { duaName ->
             val intent = Intent(this, WebViewActivity::class.java)
-            intent.putExtra("hadith_id", hadith.id)
-            intent.putExtra("title", hadith.title)
+            intent.putExtra("duaGlobalId", duaName.dua_global_id)
+            intent.putExtra("title", duaName.duaname)
+            intent.putExtra("chapter_name", duaName.chapname)
             startActivity(intent)
         }
         recyclerView.adapter = adapter
     }
 
-    private fun filterHadiths(query: String) {
-        val filtered = if (query.isBlank()) {
-            allHadiths
-        } else {
-            allHadiths.filter { it.title.contains(query, ignoreCase = true) }
-        }
-        adapter.updateData(filtered, query)
-    }
+    private fun loadDuaNames() {
+        val categoryId = intent.getIntExtra("category_id", -1)
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.action_menu, menu)
-        val iconColor = ContextCompat.getColor(this, R.color.toolbar_icon_color)
-        for (i in 0 until menu.size) {
-            val menuItem = menu[i]
-            menuItem.icon?.let { icon ->
-                DrawableCompat.setTint(DrawableCompat.wrap(icon), iconColor)
+        lifecycleScope.launch {
+            val duaNamesFlow = if (categoryId != -1) {
+                repository.getDuaNamesByCategory(categoryId)
+            } else {
+                repository.getAllDuaNames()
+            }
+
+            duaNamesFlow.collect { duaNames ->
+                allDuaNames = duaNames
+                adapter.updateData(duaNames, "")
             }
         }
+    }
 
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as? androidx.appcompat.widget.SearchView
-        // Change the text color
-        val searchEditText = searchView?.findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-        searchEditText?.setTextColor(Color.WHITE) // Your desired color
-        searchEditText?.setHintTextColor(Color.GRAY) // Optional: hint color
-        searchView?.queryHint = "Search hadiths..."
-        searchView?.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean = false
+    private fun filterDuaNames(query: String) {
+        lifecycleScope.launch {
+            if (query.isBlank()) {
+                adapter.updateData(allDuaNames, "")
+            } else {
+                // Use Room's search functionality for better performance
+                repository.searchDuaNames(query).collect { searchResults ->
+                    adapter.updateData(searchResults, query)
+                }
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.search_menu, menu)
+        val searchItem = menu?.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as? SearchView
+
+        searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let { filterDuaNames(it) }
+                return true
+            }
+
             override fun onQueryTextChange(newText: String?): Boolean {
-                filterHadiths(newText.orEmpty())
+                newText?.let { filterDuaNames(it) }
                 return true
             }
         })
+
         return true
     }
 

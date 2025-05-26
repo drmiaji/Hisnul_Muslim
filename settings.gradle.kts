@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Webview Json Template"
+rootProject.name = "Hisnul Muslim"
 include(":app")

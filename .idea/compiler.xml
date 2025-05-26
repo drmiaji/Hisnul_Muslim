@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
       <module name="HisnulMuslim.app" target="17" />
+      <module name="Webview_Json_Template.app" target="17" />
       <module name="Webview_Json_Template.feature_webapp1" target="17" />
       <module name="Webview_Template.app" target="17" />
     </bytecodeTargetLevel>

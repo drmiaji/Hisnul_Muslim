@@ -11,9 +11,6 @@ import com.drmiaji.hisnulmuslim.data.dao.DuaNameDao
 import com.drmiaji.hisnulmuslim.data.entities.Category
 import com.drmiaji.hisnulmuslim.data.entities.DuaDetail
 import com.drmiaji.hisnulmuslim.data.entities.DuaName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Database(
     entities = [Category::class, DuaName::class, DuaDetail::class],
@@ -46,7 +43,7 @@ abstract class HisnulMuslimDatabase : RoomDatabase() {
         }
 
         // Optional: Database callback for initialization
-        private object DatabaseCallback : RoomDatabase.Callback() {
+        private object DatabaseCallback : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 // Optional: Add any initialization logic here
