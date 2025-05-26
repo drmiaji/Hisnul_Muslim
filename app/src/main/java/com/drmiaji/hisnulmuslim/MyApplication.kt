@@ -1,6 +1,8 @@
 package com.drmiaji.hisnulmuslim
 
 import android.app.Application
+import com.drmiaji.hisnulmuslim.data.database.HisnulMuslimDatabase
+import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
 import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 
 class MyApplication : Application() {
@@ -8,4 +10,11 @@ class MyApplication : Application() {
         super.onCreate()
         ThemeUtils.applyTheme(this)
     }
+
+    val database = HisnulMuslimDatabase.getDatabase(this)
+    val repository = HisnulMuslimRepository(
+        database.categoryDao(),
+        database.duaNameDao(),
+        database.duaDetailDao()
+    )
 }

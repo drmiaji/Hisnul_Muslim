@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-kapt") // Add this for Room annotation processing
 }
 
 android {
@@ -84,4 +85,13 @@ dependencies {
 
     // JSON Parsing
     implementation(libs.gson)
+
+    // Room Database - Add these dependencies
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx) // For Kotlin Extensions and Coroutines support
+    kapt(libs.androidx.room.compiler) // For annotation processing
+
+    // Coroutines (if not already included)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
 }
