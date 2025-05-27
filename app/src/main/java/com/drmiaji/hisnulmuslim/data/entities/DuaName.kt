@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "duanames")
 data class DuaName(
-    @PrimaryKey val ID: String,
+    @PrimaryKey val ID: Int,
     val category: Int?,
     val chap_id: Int?,
     val chapname: String?,
