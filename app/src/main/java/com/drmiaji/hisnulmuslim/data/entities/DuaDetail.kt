@@ -2,23 +2,11 @@ package com.drmiaji.hisnulmuslim.data.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.ForeignKey
 
-@Entity(
-    tableName = "duadetails",
-    foreignKeys = [
-        ForeignKey(
-            entity = DuaName::class,
-            parentColumns = ["dua_global_id"],
-            childColumns = ["dua_global_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ]
-)
+@Entity(tableName = "duadetails")
 data class DuaDetail(
-    @PrimaryKey
-    val ID: Int,
-    val dua_global_id: String,
+    @PrimaryKey val ID: Int,
+    val dua_global_id: Int,
     val dua_segment_id: Int,
     val top: String?,
     val arabic_diacless: String?,
