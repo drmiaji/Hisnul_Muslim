@@ -25,6 +25,6 @@ interface DuaDao {
     fun getDuaNamesByCategory(categoryId: Int): List<DuaName>
 
     // Example: get a dua name by global id
-    @Query("SELECT * FROM duanames WHERE dua_global_id = :duaGlobalId LIMIT 1")
-    fun getDuaNameByGlobalId(duaGlobalId: Int): DuaName?
+    @Query("SELECT * FROM duanames WHERE chapname = :chapname LIMIT 1")
+    fun getDuaNameByGlobalId(chapname: String): DuaName?
 }

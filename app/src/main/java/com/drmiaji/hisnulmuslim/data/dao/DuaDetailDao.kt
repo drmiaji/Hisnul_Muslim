@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DuaDetailDao {
-    @Query("SELECT * FROM duadetails WHERE dua_global_id = :globalId ORDER BY dua_segment_id")
+    @Query("SELECT * FROM duadetails WHERE dua_global_id = :globalId ORDER BY dua_global_id")
     fun getDuaDetailsByGlobalId(globalId: String): Flow<List<DuaDetail>>
 
     @Query("SELECT * FROM duadetails WHERE ID = :id")

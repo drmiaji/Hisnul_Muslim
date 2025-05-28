@@ -6,16 +6,16 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DuaNameDao {
-    @Query("SELECT * FROM duanames ORDER BY chap_id, dua_id")
+    @Query("SELECT * FROM duanames ORDER BY chap_id, chapname")
     fun getAllDuaNames(): Flow<List<DuaName>>
 
-    @Query("SELECT * FROM duanames WHERE category = :categoryId ORDER BY chap_id, dua_id")
+    @Query("SELECT * FROM duanames WHERE category = :categoryId ORDER BY category")
     fun getDuaNamesByCategory(categoryId: Int): Flow<List<DuaName>>
 
-    @Query("SELECT * FROM duanames WHERE dua_global_id = :globalId")
+    @Query("SELECT * FROM duanames WHERE chapname = :globalId")
     suspend fun getDuaNameByGlobalId(globalId: String): DuaName?
 
-    @Query("SELECT * FROM duanames WHERE duaname LIKE '%' || :searchQuery || '%' OR chapname LIKE '%' || :searchQuery || '%' OR tags LIKE '%' || :searchQuery || '%'")
+    @Query("SELECT * FROM duanames WHERE chapname LIKE '%' || :searchQuery || '%' OR chapname LIKE '%' || :searchQuery || '%' OR tags LIKE '%' || :searchQuery || '%'")
     fun searchDuaNames(searchQuery: String): Flow<List<DuaName>>
 
     @Query("SELECT DISTINCT chapname FROM duanames ORDER BY chap_id")
