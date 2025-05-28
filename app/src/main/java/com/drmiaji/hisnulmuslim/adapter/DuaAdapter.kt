@@ -41,7 +41,7 @@ class DuaAdapter(
             chapterNameText.text = highlightSearchQuery(duaName.chapname.toString(), currentQuery)
 
             // Display chapter.dua numbering
-            duaNumberText.text = "${duaName.chap_id}.${duaName.chap_id}"
+            duaNumberText.text = "${duaName.chap_id}"
 
             // Handle item click
             itemView.setOnClickListener { onItemClick(duaName) }
