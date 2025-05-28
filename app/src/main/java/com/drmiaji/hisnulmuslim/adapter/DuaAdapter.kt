@@ -34,13 +34,13 @@ class DuaAdapter(
                 chapterNameText.typeface = typeface
             }
 
-            // Set dua name with search highlighting
-            duaNameText.text = highlightSearchQuery(duaName.chapname.toString(), currentQuery)
+            // Set chapter name (chapname) with search highlighting
+            duaNameText.text = highlightSearchQuery(duaName.chapname ?: "", currentQuery)
 
-            // Set chapter name with search highlighting
-            chapterNameText.text = highlightSearchQuery(duaName.chapname.toString(), currentQuery)
+            // Set category name instead of chapname again
+            chapterNameText.text = highlightSearchQuery(duaName.category ?: "Unknown Category", currentQuery)
 
-            // Display chapter.dua numbering
+            // Display chapter ID
             duaNumberText.text = "${duaName.chap_id}"
 
             // Handle item click

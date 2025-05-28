@@ -22,6 +22,8 @@ import com.drmiaji.hisnulmuslim.data.database.HisnulMuslimDatabase
 import com.drmiaji.hisnulmuslim.data.entities.DuaName
 import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
 import com.google.android.material.appbar.MaterialToolbar
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 
@@ -83,11 +85,11 @@ class ChapterListActivity : BaseActivity() {
     }
 
     private fun loadDuaNames() {
-        val category = intent.getStringExtra("category") ?: ""          // Use String for category
+        val category = intent.getStringExtra("category") ?: ""
 
         lifecycleScope.launch {
             val duaNamesFlow = if (category.isNotBlank()) {
-                repository.getDuaNamesByCategory(category)
+                repository.getDuaNamesByCategory(category) // This now handles the conversion
             } else {
                 repository.getAllDuaNames()
             }
