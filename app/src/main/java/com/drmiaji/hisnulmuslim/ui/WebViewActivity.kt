@@ -70,8 +70,8 @@ class WebViewActivity : BaseActivity() {
         webView = findViewById(R.id.webview)
         webView.settings.apply {
             javaScriptEnabled = false
-            allowFileAccess = false
-            allowContentAccess = false
+            allowFileAccess = true       // allow access to assets for CSS
+            allowContentAccess = true
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
@@ -88,7 +88,14 @@ class WebViewActivity : BaseActivity() {
                     repository.getDuaDetailsByGlobalId(chapId).collect { duaDetails ->
                         if (duaDetails.isNotEmpty()) {
                             val htmlContent = generateHtmlContent(duaDetails, chapterName)
-                            webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+                            // Use base URL for assets path so CSS loads
+                            webView.loadDataWithBaseURL(
+                                "file:///android_asset/contents/",
+                                htmlContent,
+                                "text/html",
+                                "UTF-8",
+                                null
+                            )
                         } else {
                             showErrorMessage("No content found for this dua.")
                         }
@@ -111,68 +118,7 @@ class WebViewActivity : BaseActivity() {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body {
-                        font-family: 'Arial', sans-serif;
-                        margin: 16px;
-                        line-height: 1.6;
-                        background-color: #f5f5f5;
-                    }
-                    .dua-container {
-                        background: white;
-                        border-radius: 8px;
-                        padding: 16px;
-                        margin-bottom: 16px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    }
-                    .chapter-title {
-                        color: #2196F3;
-                        font-size: 18px;
-                        font-weight: bold;
-                        margin-bottom: 16px;
-                        text-align: center;
-                    }
-                    .top-text, .bottom-text {
-                        color: #666;
-                        font-size: 14px;
-                        margin: 8px 0;
-                        font-style: italic;
-                    }
-                    .arabic {
-                        font-size: 24px;
-                        text-align: right;
-                        direction: rtl;
-                        margin: 16px 0;
-                        line-height: 2;
-                        color: #333;
-                    }
-                    .transliteration {
-                        font-size: 16px;
-                        color: #444;
-                        margin: 12px 0;
-                        font-style: italic;
-                    }
-                    .translation {
-                        font-size: 16px;
-                        color: #333;
-                        margin: 12px 0;
-                    }
-                    .reference {
-                        font-size: 12px;
-                        color: #888;
-                        margin-top: 12px;
-                        border-top: 1px solid #eee;
-                        padding-top: 8px;
-                    }
-                    .segment {
-                        margin-bottom: 24px;
-                        border-bottom: 1px solid #eee;
-                        padding-bottom: 16px;
-                    }
-                    .segment:last-child {
-                        border-bottom: none;
-                    }
-                </style>
+                <link rel="stylesheet" type="text/css" href="style.css">
             </head>
             <body>
         """)
@@ -234,23 +180,25 @@ class WebViewActivity : BaseActivity() {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body { 
-                        font-family: Arial; 
-                        padding: 20px; 
-                        text-align: center; 
-                        color: #666; 
-                    }
-                </style>
+                <link rel="stylesheet" type="text/css" href="style.css">
             </head>
             <body>
-                <h3>Error</h3>
-                <p>$message</p>
+                <div class="error-message">
+                    <h3>Error</h3>
+                    <p>$message</p>
+                </div>
             </body>
             </html>
         """
-        webView.loadDataWithBaseURL(null, errorHtml, "text/html", "UTF-8", null)
+        webView.loadDataWithBaseURL(
+            "file:///android_asset/contents/",
+            errorHtml,
+            "text/html",
+            "UTF-8",
+            null
+        )
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.action_menu, menu)

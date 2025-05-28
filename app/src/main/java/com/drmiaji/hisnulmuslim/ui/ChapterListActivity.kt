@@ -76,6 +76,7 @@ class ChapterListActivity : BaseActivity() {
             val intent = Intent(this, WebViewActivity::class.java)
             intent.putExtra("chap_id", duaName.chap_id)                 // pass as Int
             intent.putExtra("chapter_name", duaName.chapname ?: "")     // pass as String
+            intent.putExtra("title", duaName.chapname) // or whatever title you want
             startActivity(intent)
         }
         recyclerView.adapter = adapter
