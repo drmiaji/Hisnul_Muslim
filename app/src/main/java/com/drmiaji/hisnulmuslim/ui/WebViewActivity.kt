@@ -79,13 +79,13 @@ class WebViewActivity : BaseActivity() {
     }
 
     private fun loadDuaContent() {
-        duaGlobalId = intent.getStringExtra("duaGlobalId")
+        val chapId = intent.getIntExtra("chap_id", -1)
         val chapterName = intent.getStringExtra("chapter_name") ?: ""
 
-        duaGlobalId?.let { globalId ->
+        if (chapId != -1) {
             lifecycleScope.launch {
                 try {
-                    repository.getDuaDetailsByGlobalId(globalId).collect { duaDetails ->
+                    repository.getDuaDetailsByGlobalId(chapId).collect { duaDetails ->
                         if (duaDetails.isNotEmpty()) {
                             val htmlContent = generateHtmlContent(duaDetails, chapterName)
                             webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
@@ -97,7 +97,9 @@ class WebViewActivity : BaseActivity() {
                     showErrorMessage("Error loading dua content: ${e.message}")
                 }
             }
-        } ?: showErrorMessage("Invalid dua id")
+        } else {
+            showErrorMessage("Invalid dua id")
+        }
     }
 
     private fun generateHtmlContent(duaDetails: List<DuaDetail>, chapterName: String): String {
@@ -179,7 +181,7 @@ class WebViewActivity : BaseActivity() {
             htmlBuilder.append("<div class='chapter-title'>$chapterName</div>")
         }
 
-        duaDetails.sortedBy { it.dua_segment_id }.forEach { detail ->
+        duaDetails.sortedBy { it.id }.forEach { detail ->
             htmlBuilder.append("<div class='dua-container'>")
             htmlBuilder.append("<div class='segment'>")
 

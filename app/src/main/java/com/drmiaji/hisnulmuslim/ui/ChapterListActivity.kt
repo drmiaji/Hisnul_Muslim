@@ -74,20 +74,19 @@ class ChapterListActivity : BaseActivity() {
 
         adapter = DuaAdapter(emptyList()) { duaName ->
             val intent = Intent(this, WebViewActivity::class.java)
-            intent.putExtra("duaGlobalId", duaName.dua_global_id)
-            intent.putExtra("title", duaName.duaname)
-            intent.putExtra("chapter_name", duaName.chapname)
+            intent.putExtra("chap_id", duaName.chap_id)                 // pass as Int
+            intent.putExtra("chapter_name", duaName.chapname ?: "")     // pass as String
             startActivity(intent)
         }
         recyclerView.adapter = adapter
     }
 
     private fun loadDuaNames() {
-        val categoryId = intent.getIntExtra("category_id", -1)
+        val category = intent.getStringExtra("category") ?: ""          // Use String for category
 
         lifecycleScope.launch {
-            val duaNamesFlow = if (categoryId != -1) {
-                repository.getDuaNamesByCategory(categoryId)
+            val duaNamesFlow = if (category.isNotBlank()) {
+                repository.getDuaNamesByCategory(category)
             } else {
                 repository.getAllDuaNames()
             }

@@ -17,14 +17,14 @@ class HisnulMuslimRepository(
 
     // Category operations
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
-
     suspend fun getCategoryById(id: Int): Category? = categoryDao.getCategoryById(id)
 
     // DuaName operations
     fun getAllDuaNames(): Flow<List<DuaName>> = duaNameDao.getAllDuaNames()
 
-    fun getDuaNamesByCategory(categoryId: Int): Flow<List<DuaName>> =
-        duaNameDao.getDuaNamesByCategory(categoryId)
+    // category is now String, not Int!
+    fun getDuaNamesByCategory(category: String): Flow<List<DuaName>> =
+        duaNameDao.getDuaNamesByCategory(category)
 
     suspend fun getDuaNameByGlobalId(globalId: String): DuaName? =
         duaNameDao.getDuaNameByGlobalId(globalId)
@@ -34,8 +34,8 @@ class HisnulMuslimRepository(
 
     fun getAllChapterNames(): Flow<List<String>> = duaNameDao.getAllChapterNames()
 
-    // DuaDetail operations
-    fun getDuaDetailsByGlobalId(globalId: String): Flow<List<DuaDetail>> =
+    // DuaDetail operations: dua_global_id is Int!
+    fun getDuaDetailsByGlobalId(globalId: Int): Flow<List<DuaDetail>> =
         duaDetailDao.getDuaDetailsByGlobalId(globalId)
 
     suspend fun getDuaDetailById(id: Int): DuaDetail? =
@@ -45,9 +45,13 @@ class HisnulMuslimRepository(
         duaDetailDao.searchDuaDetails(query)
 
     // Combined operations
-    suspend fun getDuaWithDetails(globalId: String): Pair<DuaName?, List<DuaDetail>> {
-        val duaName = duaNameDao.getDuaNameByGlobalId(globalId)
+    suspend fun getDuaWithDetails(globalId: Int): Pair<DuaName?, List<DuaDetail>> {
+        // In this context, globalId is likely a chapter name or identifier, but your schema
+        // links dua_details by dua_global_id (Int). If you want to fetch DuaName by chap_id, use getDuaNameByChapId
+        // If you want to fetch DuaName by chapname, use getDuaNameByGlobalId
         val details = duaDetailDao.getDuaDetailsByGlobalId(globalId).first()
+        // If you want to fetch the DuaName by chap_id == globalId
+        val duaName = duaNameDao.getDuaNameByGlobalId(globalId.toString())
         return Pair(duaName, details)
     }
 }

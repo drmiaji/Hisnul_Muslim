@@ -6,10 +6,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DuaDetailDao {
-    @Query("SELECT * FROM duadetails WHERE dua_global_id = :globalId ORDER BY dua_global_id")
-    fun getDuaDetailsByGlobalId(globalId: String): Flow<List<DuaDetail>>
+    // dua_global_id is Int, not String
+    @Query("SELECT * FROM duadetails WHERE dua_global_id = :globalId ORDER BY id")
+    fun getDuaDetailsByGlobalId(globalId: Int): Flow<List<DuaDetail>>
 
-    @Query("SELECT * FROM duadetails WHERE ID = :id")
+    // Column is 'id' not 'ID'
+    @Query("SELECT * FROM duadetails WHERE id = :id")
     suspend fun getDuaDetailById(id: Int): DuaDetail?
 
     @Query("SELECT * FROM duadetails WHERE arabic LIKE '%' || :searchQuery || '%' OR transliteration LIKE '%' || :searchQuery || '%' OR translations LIKE '%' || :searchQuery || '%'")
