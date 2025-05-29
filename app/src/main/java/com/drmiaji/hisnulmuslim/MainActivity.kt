@@ -93,26 +93,16 @@ import kotlinx.coroutines.launch
 import androidx.core.net.toUri
 import com.drmiaji.hisnulmuslim.ui.theme.FontManager
 
+enum class MainTab { CATEGORY, CHAPTER }
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             MyAppTheme {
-                MainScreen(
-                    onNavigateToContents = { goToContents() },
-                    onNavigateToSettings = { goToSettings() },
-                    onLogoClick = { goToContents() }
-                )
+                MainScreen()
             }
         }
-    }
-
-    private fun goToContents() {
-        startActivity(Intent(this, ChapterListActivity::class.java)) // ← replace with your actual Activity
-    }
-    private fun goToSettings() {
-        startActivity(Intent(this, SettingsActivity::class.java)) // ← replace with your actual Activity
     }
 }
 
@@ -219,7 +209,8 @@ fun MainScreen(
                                             item.linkUrl != null -> {
                                                 if (item.linkUrl.contains("facebook.com")) {
                                                     // Open in external browser
-                                                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(item.linkUrl))
+                                                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                                                        item.linkUrl.toUri())
                                                     context.startActivity(browserIntent)
                                                 } else {
                                                     // Open in WebViewActivity
@@ -313,19 +304,6 @@ fun MainScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.coverpage),
-                    contentDescription = "App Logo",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth(0.85f)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(24.dp))
-                        .clickable { onLogoClick() }
-                        .border(2.dp, Color.White, RoundedCornerShape(24.dp))
-                        .shadow(8.dp, RoundedCornerShape(24.dp))
-                )
-
                 // Add category/chapter selection
                 TwoColumnSelection(
                     onCategoryClick = { // Navigate to category grid
