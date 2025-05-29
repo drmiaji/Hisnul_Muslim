@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
-
 class ChapterListActivity : BaseActivity() {
     private lateinit var adapter: DuaAdapter
     private lateinit var repository: HisnulMuslimRepository

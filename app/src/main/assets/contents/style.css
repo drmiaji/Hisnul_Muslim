@@ -1,24 +1,37 @@
-.top-button {
-    padding: 8px 14px;
-    font-size: 16px;
-    font-family: 'Solaimanlipi';
-    border: 1px solid #ccc; /* light gray border */
-    border-radius: 6px;
-    background-color: #f9f9f9; /* very light background */
-    color: #333;
-    cursor: pointer;
-    transition: background-color 0.2s, border-color 0.2s;
+/* ========== BASE STYLES ========== */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #111111;
+    --arabic-color: #000000;
+    --heading-color: #006400;
+    --quote-bg: #f5f5f5;
+    --quote-border: #006400;
+    --button-bg: #f9f9f9;
+    --button-text: #333333;
+    --button-border: #cccccc;
+    --button-hover-bg: #eaeaea;
+    --reference-color: #888888;
+    --highlight-color: #b22222;
+    --link-color: #0047AB;
+    --hr-color: #dddddd;
 }
 
-.top-button:hover {
-    background-color: #eaeaea; /* slightly darker on hover */
-    border-color: #bbb; /* slightly darker border on hover */
+.dark {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --arabic-color: #dddddd;
+    --heading-color: #90ee90;
+    --quote-bg: #202020;
+    --quote-border: #90ee90;
+    --button-bg: #1f1f1f;
+    --button-text: #e0e0e0;
+    --button-border: #333333;
+    --button-hover-bg: #2c2c2c;
+    --reference-color: #999999;
+    --highlight-color: #ff7f7f;
+    --link-color: #90caf9;
+    --hr-color: #444444;
 }
-
-body.show-transliteration .transliteration {
-    display: block;
-}
-
 /* ========== FONT DECLARATIONS ========== */
 @font-face {
     font-family: 'Solaimanlipi';
@@ -32,234 +45,126 @@ body.show-transliteration .transliteration {
     font-display: swap;
 }
 
-/* ========== LIGHT MODE (DEFAULT) ========== */
+/* ========== BODY & TYPOGRAPHY ========== */
 html, body {
     margin: 0;
     padding: 16px;
     font-family: 'Solaimanlipi', 'Segoe UI', 'Arial', sans-serif;
     line-height: 1.6;
-    background-color: #ffffff;
-    color: #111111;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     text-align: justify;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ========== HEADINGS - LIGHT MODE ========== */
+/* ========== TEXT ELEMENTS ========== */
 h1, h2, h3, h4, h5, h6 {
     font-weight: bold;
-    color: #006400;
+    color: var(--heading-color);
     margin: 16px 0 8px;
     direction: ltr;
     text-align: left;
-    font-size: 20px; /* ✅ Add this line */
-}
-
-/* ========== TEXT - LIGHT MODE ========== */
-p {
-    margin: 12px 0;
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .arabic {
     font-family: 'quran-arabic', serif;
     font-size: 22px;
-    color: #000000;
+    color: var(--arabic-color);
     direction: rtl;
     text-align: justify;
     line-height: 1.8;
     margin: 16px 0;
 }
 
-.bangla {
+.bangla, .translation {
     font-size: 16px;
-    color: #111111;
-    direction: ltr;
-    text-align: justify;
-    margin: 10px 0 20px 0;
+    color: var(--text-color);
+    margin: 12px 0;
 }
 
 .transliteration {
     display: none;
     font-size: 16px;
-    color: #666666;
+    color: var(--reference-color);
     font-style: italic;
     margin: 8px 0;
 }
 
-.translation {
-    font-size: 16px;
-    color: #111111;
-    margin: 12px 0;
-}
-
 .reference {
     font-size: 14px;
-    color: #888888;
+    color: var(--reference-color);
     margin: 8px 0;
     font-weight: bold;
 }
 
 .highlight {
     font-weight: bold;
-    color: #b22222;
+    color: var(--highlight-color);
 }
 
-sup {
-    font-size: 12px;
-    vertical-align: super;
-    font-weight: bold;
-}
-
-/* ========== QUOTES - LIGHT MODE ========== */
-blockquote {
+/* ========== QUOTES & BLOCKS ========== */
+blockquote, .bangla-quote {
     font-size: 16px;
     padding: 10px 16px;
     margin: 12px 0;
-    background-color: #f5f5f5;
-    border-left: 4px solid #006400;
-}
-
-.bangla-quote {
-    font-size: 16px;
-    background-color: #f1f8e9;
-    color: #111111;
-    border-left: 4px solid #008B5B;
-    padding: 10px 16px;
-    margin: 12px 0;
+    background-color: var(--quote-bg);
+    border-left: 4px solid var(--quote-border);
     border-radius: 6px;
+    color: var(--text-color);
 }
 
-/* ========== LINKS - LIGHT MODE ========== */
-.toc a {
-    color: #0047AB;
-    text-decoration: none;
-}
-
-/* ========== BUTTONS - LIGHT MODE ========== */
-#goTopBtn {
-    position: fixed;
-    bottom: 32px;
-    right: 24px;
-    z-index: 1000;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 50%;
-    background: #0047ab;
-    color: #ffffff;
-    font-size: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+/* ========== BUTTONS & CONTROLS ========== */
+.top-button {
+    padding: 8px 14px;
+    font-size: 16px;
+    font-family: 'Solaimanlipi';
+    border: 1px solid var(--button-border);
+    border-radius: 6px;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    display: none;
+    transition: all 0.2s ease;
 }
 
-#themeToggle {
+.top-button:hover {
+    background-color: var(--button-hover-bg);
+    border-color: var(--button-border);
+}
+
+#themeToggle, #goTopBtn {
     position: fixed;
-    top: 24px;
-    right: 24px;
-    z-index: 1001;
-    padding: 12px 20px;
+    z-index: 1000;
+    padding: 12px;
     border-radius: 8px;
-    background: #0047ab;
-    color: #ffffff;
-    border: 2px solid #0047ab;
+    background: var(--link-color);
+    color: var(--bg-color);
+    border: none;
     font-size: 14px;
     font-weight: bold;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: Arial, sans-serif;
 }
 
-#themeToggle:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-/* ==================== DARK MODE ==================== */
-html.dark body {
-    background-color: #151515 !important;
-    color: #cccccc !important;
-}
-
-html.dark h1,
-html.dark h2,
-html.dark h3,
-html.dark h4,
-html.dark h5,
-html.dark h6 {
-    color: #90ee90 !important;
-}
-
-html.dark .arabic {
-    color: #dddddd !important;
-}
-
-html.dark .bangla {
-    color: #cccccc !important;
-}
-
-html.dark .transliteration {
-    color: #aaaaaa !important;
-}
-
-html.dark .translation {
-    color: #cccccc !important;
-}
-
-html.dark .reference {
-    color: #999999 !important;
-}
-
-html.dark .highlight {
-    color: #ff7f7f !important;
-}
-
-html.dark blockquote {
-    background-color: #202020 !important;
-    border-left-color: #90ee90 !important;
-    color: #cccccc !important;
-}
-
-html.dark .bangla-quote {
-    background-color: #2f402f !important;
-    color: #cccccc !important;
-    border-left-color: #90ee90 !important;
-}
-
-html.dark .toc a {
-    color: #90caf9 !important;
-    text-decoration: underline;
-}
-
-html.dark #goTopBtn {
-    background: #90caf9 !important;
-    color: #101010 !important;
-}
-
-html.dark #themeToggle {
-    background: #90caf9 !important;
-    color: #101010 !important;
-    border-color: #90caf9 !important;
-}
-
-/* ========== HORIZONTAL RULE ========== */
+/* ========== MISC ========== */
 hr {
     margin: 20px 0;
-    border: 1px solid #ddd;
+    border: 1px solid var(--hr-color);
 }
 
-html.dark hr {
-    border-color: #444 !important;
-}
-html.dark .top-button {
-    background-color: #1f1f1f;
-    color: #e0e0e0;
-    border: 1px solid #333;
+.toc a {
+    color: var(--link-color);
+    text-decoration: none;
 }
 
-html.dark .top-button:hover {
-    background-color: #2c2c2c;
-    border-color: #555;
-    color: #ffffff;
+/* ========== UTILITY CLASSES ========== */
+body.show-transliteration .transliteration {
+    display: block;
+}
+
+.error-message {
+    color: var(--highlight-color);
+    padding: 20px;
+    text-align: center;
 }

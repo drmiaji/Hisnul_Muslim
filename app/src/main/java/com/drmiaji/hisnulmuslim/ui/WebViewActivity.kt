@@ -1,11 +1,16 @@
 package com.drmiaji.hisnulmuslim.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.WebSettings
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -66,15 +71,41 @@ class WebViewActivity : BaseActivity() {
         )
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
         webView = findViewById(R.id.webview)
         webView.settings.apply {
-            javaScriptEnabled = false
-            allowFileAccess = true       // allow access to assets for CSS
+            javaScriptEnabled = true // Enable for theme switching
+            allowFileAccess = true
             allowContentAccess = true
             setSupportZoom(true)
             builtInZoomControls = true
             displayZoomControls = false
+        }
+
+        // Add WebView client to handle theme changes
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                applyDarkModeToWebView()
+            }
+        }
+    }
+
+    private fun applyDarkModeToWebView() {
+        val nightModeFlags = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK
+
+        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
+            // For Android 10+ (API 29+)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                webView.settings.forceDark = WebSettings.FORCE_DARK_ON
+            }
+
+            // Inject JavaScript to add dark class
+            webView.evaluateJavascript("""
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+        """.trimIndent(), null)
         }
     }
 
@@ -198,7 +229,6 @@ class WebViewActivity : BaseActivity() {
             null
         )
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.action_menu, menu)
