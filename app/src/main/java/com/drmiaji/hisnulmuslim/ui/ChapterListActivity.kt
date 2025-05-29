@@ -78,13 +78,16 @@ class ChapterListActivity : BaseActivity() {
         adapter = DuaAdapter(emptyList()) { duaName ->
             // Launch coroutine to get the first DuaDetail of this chapter
             lifecycleScope.launch {
-                val firstDetail = repository.getDuaDetailsByGlobalId(duaName.chap_id).firstOrNull()?.firstOrNull()
+                // Use .firstOrNull() from Flow for a single result; avoid nested .firstOrNull()?.firstOrNull()
+                val duaDetails = repository.getDuaDetailsByGlobalId(duaName.chap_id).firstOrNull()
+                val firstDetail = duaDetails?.firstOrNull()
                 if (firstDetail != null) {
-                    val intent = Intent(this@ChapterListActivity, WebViewActivity::class.java)
-                    intent.putExtra("dua_id", firstDetail.id)                     // Pass unique dua detail id
-                    intent.putExtra("chap_id", duaName.chap_id)                   // Optional: pass for reference
-                    intent.putExtra("chapter_name", duaName.chapname ?: "")
-                    intent.putExtra("title", duaName.chapname)
+                    val intent = Intent(this@ChapterListActivity, com.drmiaji.hisnulmuslim.ui.WebViewActivity::class.java).apply {
+                        putExtra("dua_id", firstDetail.id)
+                        putExtra("chap_id", duaName.chap_id)
+                        putExtra("chapter_name", duaName.chapname ?: "")
+                        putExtra("title", duaName.chapname)
+                    }
                     startActivity(intent)
                 } else {
                     Toast.makeText(this@ChapterListActivity, "No dua details found for this chapter", Toast.LENGTH_SHORT).show()
@@ -99,7 +102,7 @@ class ChapterListActivity : BaseActivity() {
 
         lifecycleScope.launch {
             val duaNamesFlow = if (category.isNotBlank()) {
-                repository.getDuaNamesByCategory(category) // This now handles the conversion
+                repository.getDuaNamesByCategory(category)
             } else {
                 repository.getAllDuaNames()
             }
@@ -116,7 +119,6 @@ class ChapterListActivity : BaseActivity() {
             if (query.isBlank()) {
                 adapter.updateData(allDuaNames, "")
             } else {
-                // Use Room's search functionality for better performance
                 repository.searchDuaNames(query).collect { searchResults ->
                     adapter.updateData(searchResults, query)
                 }
@@ -144,33 +146,35 @@ class ChapterListActivity : BaseActivity() {
         return true
     }
 
-    // Handle the back button click
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-        when (itemId) {
+        when (item.itemId) {
             android.R.id.home -> {
                 onBackPressedDispatcher.onBackPressed()
-                true
+                return true
             }
             R.id.share -> {
-                val myIntent = Intent(Intent.ACTION_SEND)
-                myIntent.setType("text/plain")
-                val shareSub: String? = getString(R.string.share_subject)
-                val shareBody: String? = getString(R.string.share_message)
-                myIntent.putExtra(Intent.EXTRA_TEXT, shareSub)
-                myIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
+                val myIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject))
+                    putExtra(Intent.EXTRA_TEXT, getString(R.string.share_message))
+                }
                 startActivity(Intent.createChooser(myIntent, "Share using!"))
+                return true
             }
             R.id.more_apps -> {
-                val moreApp = Intent(Intent.ACTION_VIEW)
-                moreApp.setData("https://play.google.com/store/apps/dev?id=5204491413792621474".toUri())
+                val moreApp = Intent(Intent.ACTION_VIEW).apply {
+                    data = "https://play.google.com/store/apps/dev?id=5204491413792621474".toUri()
+                }
                 startActivity(moreApp)
+                return true
             }
             R.id.action_about_us -> {
                 startActivity(Intent(this, About::class.java))
+                return true
             }
             R.id.settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                return true
             }
         }
         return super.onOptionsItemSelected(item)

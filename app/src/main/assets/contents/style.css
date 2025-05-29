@@ -168,3 +168,10 @@ body.show-transliteration .transliteration {
     padding: 20px;
     text-align: center;
 }
+
+.chapter-title {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 16px 0 8px 0;
+    text-align: center;
+}

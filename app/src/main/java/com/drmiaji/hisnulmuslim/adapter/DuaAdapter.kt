@@ -10,9 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.drmiaji.hisnulmuslim.R
 import com.drmiaji.hisnulmuslim.data.entities.DuaName
+import com.drmiaji.hisnulmuslim.utils.DuaDiffCallback
 
 class DuaAdapter(
     private var duaNames: List<DuaName>,
@@ -35,13 +37,13 @@ class DuaAdapter(
             }
 
             // Set chapter name (chapname) with search highlighting
-            duaNameText.text = highlightSearchQuery(duaName.chapname ?: "", currentQuery)
+            duaNameText.text = highlightSearchQuery(duaName.chapname.orEmpty(), currentQuery)
 
-            // Set category name instead of chapname again
-            chapterNameText.text = highlightSearchQuery(duaName.category ?: "Unknown Category", currentQuery)
+            // Set category name with search highlighting
+            chapterNameText.text = highlightSearchQuery(duaName.category.orEmpty(), currentQuery)
 
             // Display chapter ID
-            duaNumberText.text = "${duaName.chap_id}"
+            duaNumberText.text = duaName.chap_id.toString()
 
             // Handle item click
             itemView.setOnClickListener { onItemClick(duaName) }
@@ -49,34 +51,34 @@ class DuaAdapter(
 
         private fun highlightSearchQuery(text: String, query: String): SpannableString {
             val spannableString = SpannableString(text)
-            if (query.isNotEmpty() && text.contains(query, ignoreCase = true)) {
+            if (query.isNotEmpty()) {
                 val startIndex = text.indexOf(query, ignoreCase = true)
-                val endIndex = startIndex + query.length
-                val highlightColor = ContextCompat.getColor(itemView.context, R.color.search_highlight)
-                spannableString.setSpan(
-                    BackgroundColorSpan(highlightColor),
-                    startIndex,
-                    endIndex,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
+                if (startIndex >= 0) {
+                    val endIndex = startIndex + query.length
+                    val highlightColor = ContextCompat.getColor(itemView.context, R.color.search_highlight)
+                    spannableString.setSpan(
+                        BackgroundColorSpan(highlightColor),
+                        startIndex,
+                        endIndex,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                }
             }
             return spannableString
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DuaViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_dua_name, parent, false)
-
-        // Load custom font once
+        // Load custom font once (move to init if you want to avoid loading in every onCreateViewHolder)
         if (bengaliTypeface == null) {
             try {
                 bengaliTypeface = Typeface.createFromAsset(parent.context.assets, "fonts/solaimanlipi.ttf")
             } catch (e: Exception) {
-                e.printStackTrace()
+                // Optionally log or handle font errors
             }
         }
-
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_dua_name, parent, false)
         return DuaViewHolder(view)
     }
 
@@ -87,8 +89,10 @@ class DuaAdapter(
     override fun getItemCount(): Int = duaNames.size
 
     fun updateData(newDuaNames: List<DuaName>, searchQuery: String) {
-        duaNames = newDuaNames
-        currentQuery = searchQuery
-        notifyDataSetChanged()
+        val diffCallback = DuaDiffCallback(this.duaNames, newDuaNames)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        this.duaNames = newDuaNames
+        this.currentQuery = searchQuery
+        diffResult.dispatchUpdatesTo(this)
     }
 }

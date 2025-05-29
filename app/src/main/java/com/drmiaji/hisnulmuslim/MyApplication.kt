@@ -8,6 +8,7 @@ import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 class MyApplication : Application() {
 
     lateinit var repository: HisnulMuslimRepository
+        private set // Prevents external modification
 
     override fun onCreate() {
         super.onCreate()

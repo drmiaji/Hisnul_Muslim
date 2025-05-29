@@ -298,19 +298,20 @@ fun MainScreen(
             }
         ) { innerPadding ->
             val colors = MaterialTheme.colorScheme
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
-                                colors.secondaryContainer,  // softer shade for top
-                                colors.secondary            // stronger shade for bottom
+                                colors.secondaryContainer,
+                                colors.secondary
                             )
                         )
                     )
                     .padding(innerPadding),
-                contentAlignment = Alignment.Center
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.coverpage),
@@ -323,6 +324,91 @@ fun MainScreen(
                         .clickable { onLogoClick() }
                         .border(2.dp, Color.White, RoundedCornerShape(24.dp))
                         .shadow(8.dp, RoundedCornerShape(24.dp))
+                )
+
+                // Add category/chapter selection
+                TwoColumnSelection(
+                    onCategoryClick = { // Navigate to category grid
+                        val intent = Intent(context, ChapterListActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                    onChapterClick = { // Navigate to all chapter list
+                        val intent = Intent(context, ChapterListActivity::class.java)
+                        context.startActivity(intent)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TwoColumnSelection(
+    onCategoryClick: () -> Unit,
+    onChapterClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 24.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+    ) {
+        // Category-wise
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .height(100.dp)
+                .clickable { onCategoryClick() },
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_category), // add a category icon in your drawable
+                    contentDescription = "Category",
+                    modifier = Modifier.size(36.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Category-wise",
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
+
+        // Chapter-wise
+        Card(
+            modifier = Modifier
+                .weight(1f)
+                .height(100.dp)
+                .clickable { onChapterClick() },
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_chapter), // add a chapter icon in your drawable
+                    contentDescription = "Chapters",
+                    modifier = Modifier.size(36.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Chapter-wise",
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
                 )
             }
         }

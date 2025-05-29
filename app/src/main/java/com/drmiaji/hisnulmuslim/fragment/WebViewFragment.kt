@@ -48,13 +48,15 @@ class WebViewFragment : Fragment() {
 
         webView?.webViewClient = object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
-                // Prevent crash by checking if fragment is attached
                 if (!isAdded) return
                 val nightModeFlags = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
                 if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // On Android 10 to 12L (API 29-32), set forceDark (deprecated, but still needed)
+                    if (Build.VERSION.SDK_INT in Build.VERSION_CODES.Q..32) {
+                        @Suppress("DEPRECATION")
                         webView?.settings?.forceDark = WebSettings.FORCE_DARK_ON
                     }
+                    // For all OS versions, you can still inject JS if you want additional dark mode tweaks:
                     webView?.evaluateJavascript(
                         "document.documentElement.classList.add('dark');document.body.classList.add('dark');",
                         null

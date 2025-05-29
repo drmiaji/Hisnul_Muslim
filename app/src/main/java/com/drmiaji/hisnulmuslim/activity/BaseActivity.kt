@@ -39,12 +39,12 @@ abstract class BaseActivity : AppCompatActivity() {
 
         val isLightTheme = isUsingLightTheme()
 
-        // Set status and nav bar colors
+        // Set status and navigation bar colors
         val color = ContextCompat.getColor(this, getStatusBarColor())
         window.statusBarColor = color
         window.navigationBarColor = color
 
-        // Adjust light/dark icons based on theme brightness
+        // Adjust icon color for status/navigation bars based on theme
         val controller = WindowInsetsControllerCompat(window, window.decorView)
         controller.isAppearanceLightStatusBars = isLightTheme
         controller.isAppearanceLightNavigationBars = isLightTheme
@@ -54,8 +54,7 @@ abstract class BaseActivity : AppCompatActivity() {
      * Determines whether the current theme is light or dark.
      */
     private fun isUsingLightTheme(): Boolean {
-        val uiMode = resources.configuration.uiMode
-        val nightMask = uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val nightMask = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         return nightMask != android.content.res.Configuration.UI_MODE_NIGHT_YES
     }
 
@@ -63,7 +62,7 @@ abstract class BaseActivity : AppCompatActivity() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
         currentFocus?.let { view ->
             imm?.hideSoftInputFromWindow(view.windowToken, 0)
-            view.clearFocus() // Clear focus after hiding keyboard
+            view.clearFocus()
         }
     }
 

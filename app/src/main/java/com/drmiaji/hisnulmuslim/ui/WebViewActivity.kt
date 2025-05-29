@@ -26,16 +26,15 @@ import kotlinx.coroutines.launch
 class WebViewActivity : BaseActivity() {
     private lateinit var repository: HisnulMuslimRepository
     private lateinit var viewPager: ViewPager2
-    private var duaGlobalId: Int = -1
-    private lateinit var chapterName: String
+    private val duaIdToChapterName = mutableMapOf<Int, String>()
 
     override fun getLayoutResource() = R.layout.activity_webview
-    private val duaIdToChapterName = mutableMapOf<Int, String>()
+
     override fun onActivityReady(savedInstanceState: Bundle?) {
         setupToolbar()
         setupDatabase()
         setupViewPager()
-        // First, load all dua names to populate the map
+        // Load all dua names to populate the chapter name map, then load pages
         lifecycleScope.launch {
             repository.getAllDuaNames().collect { duaNames ->
                 duaIdToChapterName.clear()
@@ -86,17 +85,20 @@ class WebViewActivity : BaseActivity() {
         val selectedDuaId = intent.getIntExtra("dua_id", -1)
         lifecycleScope.launch {
             repository.getAllDuaDetailsSorted().collect { allDuaDetails ->
+                // Build HTML for each dua detail, using chapter name map
                 val htmlPages = allDuaDetails.map { detail ->
                     val chapterName = duaIdToChapterName[detail.dua_global_id] ?: ""
                     generateHtmlContent(listOf(detail), chapterName)
                 }
                 viewPager.adapter = WebViewPagerAdapter(this@WebViewActivity, htmlPages)
 
+                // Scroll to the selected dua if available
                 val startIndex = allDuaDetails.indexOfFirst { it.id == selectedDuaId }
                 if (startIndex >= 0) {
                     viewPager.setCurrentItem(startIndex, false)
                 }
 
+                // Update toolbar title as user swipes
                 viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
@@ -112,7 +114,6 @@ class WebViewActivity : BaseActivity() {
 
     private fun generateHtmlContent(duaDetails: List<DuaDetail>, chapterName: String): String {
         val htmlBuilder = StringBuilder()
-
         htmlBuilder.append("""
             <!DOCTYPE html>
             <html lang="en">
@@ -123,43 +124,23 @@ class WebViewActivity : BaseActivity() {
             </head>
             <body>
         """)
-
         if (chapterName.isNotEmpty()) {
-            htmlBuilder.append("<div class='chapter-title'>$chapterName</div>")
+            htmlBuilder.append("<h3 class='chapter-title'>$chapterName</h3>")
         }
-
         duaDetails.forEach { detail ->
-            htmlBuilder.append("<div class='dua-container'>")
-            htmlBuilder.append("<div class='segment'>")
-
-            detail.top?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='top-text'>$it</div>")
-            }
-            detail.arabic?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='arabic'>$it</div>")
-            }
-            detail.transliteration?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='transliteration'>$it</div>")
-            }
-            detail.translations?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='translation'>$it</div>")
-            }
-            detail.bottom?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='bottom-text'>$it</div>")
-            }
-            detail.reference?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='reference'>Reference: $it</div>")
-            }
-
-            htmlBuilder.append("</div>")
-            htmlBuilder.append("</div>")
+            htmlBuilder.append("<div class='dua-container'><div class='segment'>")
+            detail.top?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='top-text'>$it</div>") }
+            detail.arabic?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='arabic'>$it</div>") }
+            detail.transliteration?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='transliteration'>$it</div>") }
+            detail.translations?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='translation'>$it</div>") }
+            detail.bottom?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='bottom-text'>$it</div>") }
+            detail.reference?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='reference'>Reference: $it</div>") }
+            htmlBuilder.append("</div></div>")
         }
-
         htmlBuilder.append("""
             </body>
             </html>
         """)
-
         return htmlBuilder.toString()
     }
 
