@@ -7,9 +7,10 @@
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <!-- Include the reusable toolbar -->
+    <!-- Toolbar at the top -->
     <include layout="@layout/toolbar" />
 
+    <!-- Optional progress bar -->
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -18,6 +19,7 @@
         android:indeterminate="true"
         android:visibility="gone" />
 
+    <!-- CardView containing the ViewPager2 -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -26,10 +28,10 @@
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp">
 
-        <WebView
-            android:id="@+id/webview"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"/>
 
     </androidx.cardview.widget.CardView>
 </LinearLayout>

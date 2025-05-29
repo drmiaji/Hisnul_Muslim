@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
@@ -23,6 +24,7 @@ import com.drmiaji.hisnulmuslim.data.entities.DuaName
 import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
@@ -74,11 +76,20 @@ class ChapterListActivity : BaseActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         adapter = DuaAdapter(emptyList()) { duaName ->
-            val intent = Intent(this, WebViewActivity::class.java)
-            intent.putExtra("chap_id", duaName.chap_id)                 // pass as Int
-            intent.putExtra("chapter_name", duaName.chapname ?: "")     // pass as String
-            intent.putExtra("title", duaName.chapname) // or whatever title you want
-            startActivity(intent)
+            // Launch coroutine to get the first DuaDetail of this chapter
+            lifecycleScope.launch {
+                val firstDetail = repository.getDuaDetailsByGlobalId(duaName.chap_id).firstOrNull()?.firstOrNull()
+                if (firstDetail != null) {
+                    val intent = Intent(this@ChapterListActivity, WebViewActivity::class.java)
+                    intent.putExtra("dua_id", firstDetail.id)                     // Pass unique dua detail id
+                    intent.putExtra("chap_id", duaName.chap_id)                   // Optional: pass for reference
+                    intent.putExtra("chapter_name", duaName.chapname ?: "")
+                    intent.putExtra("title", duaName.chapname)
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(this@ChapterListActivity, "No dua details found for this chapter", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
         recyclerView.adapter = adapter
     }

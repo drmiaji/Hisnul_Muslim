@@ -1,25 +1,22 @@
 package com.drmiaji.hisnulmuslim.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Typeface
-import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.drmiaji.hisnulmuslim.R
 import com.drmiaji.hisnulmuslim.activity.About
 import com.drmiaji.hisnulmuslim.activity.BaseActivity
 import com.drmiaji.hisnulmuslim.activity.SettingsActivity
+import com.drmiaji.hisnulmuslim.adapter.WebViewPagerAdapter
 import com.drmiaji.hisnulmuslim.data.database.HisnulMuslimDatabase
 import com.drmiaji.hisnulmuslim.data.entities.DuaDetail
 import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
@@ -28,16 +25,26 @@ import kotlinx.coroutines.launch
 
 class WebViewActivity : BaseActivity() {
     private lateinit var repository: HisnulMuslimRepository
-    private lateinit var webView: WebView
-    private var duaGlobalId: String? = null
+    private lateinit var viewPager: ViewPager2
+    private var duaGlobalId: Int = -1
+    private lateinit var chapterName: String
 
     override fun getLayoutResource() = R.layout.activity_webview
-
+    private val duaIdToChapterName = mutableMapOf<Int, String>()
     override fun onActivityReady(savedInstanceState: Bundle?) {
         setupToolbar()
         setupDatabase()
-        setupWebView()
-        loadDuaContent()
+        setupViewPager()
+        // First, load all dua names to populate the map
+        lifecycleScope.launch {
+            repository.getAllDuaNames().collect { duaNames ->
+                duaIdToChapterName.clear()
+                duaNames.forEach { duaName ->
+                    duaIdToChapterName[duaName.chap_id] = duaName.chapname ?: ""
+                }
+                loadAllDuaPages()
+            }
+        }
     }
 
     private fun setupToolbar() {
@@ -71,72 +78,35 @@ class WebViewActivity : BaseActivity() {
         )
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        webView = findViewById(R.id.webview)
-        webView.settings.apply {
-            javaScriptEnabled = true // Enable for theme switching
-            allowFileAccess = true
-            allowContentAccess = true
-            setSupportZoom(true)
-            builtInZoomControls = true
-            displayZoomControls = false
-        }
-
-        // Add WebView client to handle theme changes
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                applyDarkModeToWebView()
-            }
-        }
+    private fun setupViewPager() {
+        viewPager = findViewById(R.id.viewPager)
     }
 
-    private fun applyDarkModeToWebView() {
-        val nightModeFlags = resources.configuration.uiMode and
-                Configuration.UI_MODE_NIGHT_MASK
-
-        if (nightModeFlags == Configuration.UI_MODE_NIGHT_YES) {
-            // For Android 10+ (API 29+)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                webView.settings.forceDark = WebSettings.FORCE_DARK_ON
-            }
-
-            // Inject JavaScript to add dark class
-            webView.evaluateJavascript("""
-            document.documentElement.classList.add('dark');
-            document.body.classList.add('dark');
-        """.trimIndent(), null)
-        }
-    }
-
-    private fun loadDuaContent() {
-        val chapId = intent.getIntExtra("chap_id", -1)
-        val chapterName = intent.getStringExtra("chapter_name") ?: ""
-
-        if (chapId != -1) {
-            lifecycleScope.launch {
-                try {
-                    repository.getDuaDetailsByGlobalId(chapId).collect { duaDetails ->
-                        if (duaDetails.isNotEmpty()) {
-                            val htmlContent = generateHtmlContent(duaDetails, chapterName)
-                            // Use base URL for assets path so CSS loads
-                            webView.loadDataWithBaseURL(
-                                "file:///android_asset/contents/",
-                                htmlContent,
-                                "text/html",
-                                "UTF-8",
-                                null
-                            )
-                        } else {
-                            showErrorMessage("No content found for this dua.")
-                        }
-                    }
-                } catch (e: Exception) {
-                    showErrorMessage("Error loading dua content: ${e.message}")
+    private fun loadAllDuaPages() {
+        val selectedDuaId = intent.getIntExtra("dua_id", -1)
+        lifecycleScope.launch {
+            repository.getAllDuaDetailsSorted().collect { allDuaDetails ->
+                val htmlPages = allDuaDetails.map { detail ->
+                    val chapterName = duaIdToChapterName[detail.dua_global_id] ?: ""
+                    generateHtmlContent(listOf(detail), chapterName)
                 }
+                viewPager.adapter = WebViewPagerAdapter(this@WebViewActivity, htmlPages)
+
+                val startIndex = allDuaDetails.indexOfFirst { it.id == selectedDuaId }
+                if (startIndex >= 0) {
+                    viewPager.setCurrentItem(startIndex, false)
+                }
+
+                viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        val duaDetail = allDuaDetails[position]
+                        val chapterName = duaIdToChapterName[duaDetail.dua_global_id] ?: getString(R.string.app_name)
+                        val titleTextView = findViewById<TextView>(R.id.toolbar_title)
+                        titleTextView.text = chapterName
+                    }
+                })
             }
-        } else {
-            showErrorMessage("Invalid dua id")
         }
     }
 
@@ -158,36 +128,25 @@ class WebViewActivity : BaseActivity() {
             htmlBuilder.append("<div class='chapter-title'>$chapterName</div>")
         }
 
-        duaDetails.sortedBy { it.id }.forEach { detail ->
+        duaDetails.forEach { detail ->
             htmlBuilder.append("<div class='dua-container'>")
             htmlBuilder.append("<div class='segment'>")
 
-            // Top text
             detail.top?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='top-text'>$it</div>")
             }
-
-            // Arabic text
             detail.arabic?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='arabic'>$it</div>")
             }
-
-            // Transliteration
             detail.transliteration?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='transliteration'>$it</div>")
             }
-
-            // Translation
             detail.translations?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='translation'>$it</div>")
             }
-
-            // Bottom text
             detail.bottom?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='bottom-text'>$it</div>")
             }
-
-            // Reference
             detail.reference?.takeIf { it.isNotBlank() }?.let {
                 htmlBuilder.append("<div class='reference'>Reference: $it</div>")
             }
@@ -221,13 +180,7 @@ class WebViewActivity : BaseActivity() {
             </body>
             </html>
         """
-        webView.loadDataWithBaseURL(
-            "file:///android_asset/contents/",
-            errorHtml,
-            "text/html",
-            "UTF-8",
-            null
-        )
+        viewPager.adapter = WebViewPagerAdapter(this, listOf(errorHtml))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

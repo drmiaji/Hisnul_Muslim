@@ -59,4 +59,7 @@ class HisnulMuslimRepository(
         val duaName = duaNameDao.getDuaNameByGlobalId(globalId.toString())
         return Pair(duaName, details)
     }
+
+    fun getAllDuaDetailsSorted(): Flow<List<DuaDetail>> =
+        duaDetailDao.getAllDuaDetailsSorted()
 }
