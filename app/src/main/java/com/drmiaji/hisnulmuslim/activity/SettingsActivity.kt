@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.drmiaji.hisnulmuslim.R
-import com.drmiaji.hisnulmuslim.utils.SettingsFragment
+import com.drmiaji.hisnulmuslim.fragment.SettingsFragment
 import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 import com.google.android.material.appbar.MaterialToolbar
 

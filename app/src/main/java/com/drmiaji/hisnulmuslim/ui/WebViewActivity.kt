@@ -3,18 +3,20 @@ package com.drmiaji.hisnulmuslim.ui
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.drmiaji.hisnulmuslim.R
 import com.drmiaji.hisnulmuslim.activity.About
 import com.drmiaji.hisnulmuslim.activity.BaseActivity
 import com.drmiaji.hisnulmuslim.activity.SettingsActivity
+import com.drmiaji.hisnulmuslim.adapter.WebViewPagerAdapter
 import com.drmiaji.hisnulmuslim.data.database.HisnulMuslimDatabase
 import com.drmiaji.hisnulmuslim.data.entities.DuaDetail
 import com.drmiaji.hisnulmuslim.data.repository.HisnulMuslimRepository
@@ -23,16 +25,25 @@ import kotlinx.coroutines.launch
 
 class WebViewActivity : BaseActivity() {
     private lateinit var repository: HisnulMuslimRepository
-    private lateinit var webView: WebView
-    private var duaGlobalId: String? = null
+    private lateinit var viewPager: ViewPager2
+    private val duaIdToChapterName = mutableMapOf<Int, String>()
 
     override fun getLayoutResource() = R.layout.activity_webview
 
     override fun onActivityReady(savedInstanceState: Bundle?) {
         setupToolbar()
         setupDatabase()
-        setupWebView()
-        loadDuaContent()
+        setupViewPager()
+        // Load all dua names to populate the chapter name map, then load pages
+        lifecycleScope.launch {
+            repository.getAllDuaNames().collect { duaNames ->
+                duaIdToChapterName.clear()
+                duaNames.forEach { duaName ->
+                    duaIdToChapterName[duaName.chap_id] = duaName.chapname ?: ""
+                }
+                loadAllDuaPages()
+            }
+        }
     }
 
     private fun setupToolbar() {
@@ -66,52 +77,43 @@ class WebViewActivity : BaseActivity() {
         )
     }
 
-    private fun setupWebView() {
-        webView = findViewById(R.id.webview)
-        webView.settings.apply {
-            javaScriptEnabled = false
-            allowFileAccess = true       // allow access to assets for CSS
-            allowContentAccess = true
-            setSupportZoom(true)
-            builtInZoomControls = true
-            displayZoomControls = false
-        }
+    private fun setupViewPager() {
+        viewPager = findViewById(R.id.viewPager)
     }
 
-    private fun loadDuaContent() {
-        val chapId = intent.getIntExtra("chap_id", -1)
-        val chapterName = intent.getStringExtra("chapter_name") ?: ""
-
-        if (chapId != -1) {
-            lifecycleScope.launch {
-                try {
-                    repository.getDuaDetailsByGlobalId(chapId).collect { duaDetails ->
-                        if (duaDetails.isNotEmpty()) {
-                            val htmlContent = generateHtmlContent(duaDetails, chapterName)
-                            // Use base URL for assets path so CSS loads
-                            webView.loadDataWithBaseURL(
-                                "file:///android_asset/contents/",
-                                htmlContent,
-                                "text/html",
-                                "UTF-8",
-                                null
-                            )
-                        } else {
-                            showErrorMessage("No content found for this dua.")
-                        }
-                    }
-                } catch (e: Exception) {
-                    showErrorMessage("Error loading dua content: ${e.message}")
+    private fun loadAllDuaPages() {
+        val selectedDuaId = intent.getIntExtra("dua_id", -1)
+        lifecycleScope.launch {
+            repository.getAllDuaDetailsSorted().collect { allDuaDetails ->
+                // Build HTML for each dua detail, using chapter name map
+                val htmlPages = allDuaDetails.map { detail ->
+                    val chapterName = duaIdToChapterName[detail.dua_global_id] ?: ""
+                    generateHtmlContent(listOf(detail), chapterName)
                 }
+                viewPager.adapter = WebViewPagerAdapter(this@WebViewActivity, htmlPages)
+
+                // Scroll to the selected dua if available
+                val startIndex = allDuaDetails.indexOfFirst { it.id == selectedDuaId }
+                if (startIndex >= 0) {
+                    viewPager.setCurrentItem(startIndex, false)
+                }
+
+                // Update toolbar title as user swipes
+                viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                    override fun onPageSelected(position: Int) {
+                        super.onPageSelected(position)
+                        val duaDetail = allDuaDetails[position]
+                        val chapterName = duaIdToChapterName[duaDetail.dua_global_id] ?: getString(R.string.app_name)
+                        val titleTextView = findViewById<TextView>(R.id.toolbar_title)
+                        titleTextView.text = chapterName
+                    }
+                })
             }
-        } else {
-            showErrorMessage("Invalid dua id")
         }
     }
 
     private fun generateHtmlContent(duaDetails: List<DuaDetail>, chapterName: String): String {
         val htmlBuilder = StringBuilder()
-
         htmlBuilder.append("""
             <!DOCTYPE html>
             <html lang="en">
@@ -122,54 +124,23 @@ class WebViewActivity : BaseActivity() {
             </head>
             <body>
         """)
-
         if (chapterName.isNotEmpty()) {
-            htmlBuilder.append("<div class='chapter-title'>$chapterName</div>")
+            htmlBuilder.append("<h3 class='chapter-title'>$chapterName</h3>")
         }
-
-        duaDetails.sortedBy { it.id }.forEach { detail ->
-            htmlBuilder.append("<div class='dua-container'>")
-            htmlBuilder.append("<div class='segment'>")
-
-            // Top text
-            detail.top?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='top-text'>$it</div>")
-            }
-
-            // Arabic text
-            detail.arabic?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='arabic'>$it</div>")
-            }
-
-            // Transliteration
-            detail.transliteration?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='transliteration'>$it</div>")
-            }
-
-            // Translation
-            detail.translations?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='translation'>$it</div>")
-            }
-
-            // Bottom text
-            detail.bottom?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='bottom-text'>$it</div>")
-            }
-
-            // Reference
-            detail.reference?.takeIf { it.isNotBlank() }?.let {
-                htmlBuilder.append("<div class='reference'>Reference: $it</div>")
-            }
-
-            htmlBuilder.append("</div>")
-            htmlBuilder.append("</div>")
+        duaDetails.forEach { detail ->
+            htmlBuilder.append("<div class='dua-container'><div class='segment'>")
+            detail.top?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='top-text'>$it</div>") }
+            detail.arabic?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='arabic'>$it</div>") }
+            detail.transliteration?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='transliteration'>$it</div>") }
+            detail.translations?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='translation'>$it</div>") }
+            detail.bottom?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='bottom-text'>$it</div>") }
+            detail.reference?.takeIf { it.isNotBlank() }?.let { htmlBuilder.append("<div class='reference'>Reference: $it</div>") }
+            htmlBuilder.append("</div></div>")
         }
-
         htmlBuilder.append("""
             </body>
             </html>
         """)
-
         return htmlBuilder.toString()
     }
 
@@ -190,15 +161,8 @@ class WebViewActivity : BaseActivity() {
             </body>
             </html>
         """
-        webView.loadDataWithBaseURL(
-            "file:///android_asset/contents/",
-            errorHtml,
-            "text/html",
-            "UTF-8",
-            null
-        )
+        viewPager.adapter = WebViewPagerAdapter(this, listOf(errorHtml))
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.action_menu, menu)

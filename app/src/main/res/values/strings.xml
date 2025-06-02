@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Room Database</string>
+    <string name="app_name">হিসনুল মুসলিম</string>
     <string name="about_us">About us</string>
     <string name="about">www.drmiaji.com</string>
     <string name="action_content">সূচী/Content</string>
@@ -27,4 +27,7 @@
     <string name="bokhtiyar">মুফতি মুহাম্মদ বখতিয়ার উদ্দিন</string>
     <string name="dr_allama_tahirul_qadri">Dr Allama Tahirul Qadri</string>
     <string name="minhaz_ul_quran">Minhaz ul Quran</string>
+    <string name="chapter_name">Chapter Name</string>
+    <string name="dua_name">Dua Name</string>
+    <string name="_1">1</string>
 </resources>

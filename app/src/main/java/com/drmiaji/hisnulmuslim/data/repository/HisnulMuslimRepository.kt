@@ -8,33 +8,42 @@ import com.drmiaji.hisnulmuslim.data.entities.DuaDetail
 import com.drmiaji.hisnulmuslim.data.entities.DuaName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 
 class HisnulMuslimRepository(
     private val categoryDao: CategoryDao,
     private val duaNameDao: DuaNameDao,
     private val duaDetailDao: DuaDetailDao
 ) {
-
     // Category operations
     fun getAllCategories(): Flow<List<Category>> = categoryDao.getAllCategories()
     suspend fun getCategoryById(id: Int): Category? = categoryDao.getCategoryById(id)
 
-    // DuaName operations
-    fun getAllDuaNames(): Flow<List<DuaName>> = duaNameDao.getAllDuaNames()
+    // DuaName operations - Use joined queries to get category names
+    fun getAllDuaNames(): Flow<List<DuaName>> = duaNameDao.getAllDuaNamesWithCategoryNames()
 
-    // category is now String, not Int!
-    fun getDuaNamesByCategory(category: String): Flow<List<DuaName>> =
-        duaNameDao.getDuaNamesByCategory(category)
+    // Convert category name to ID, then get duas by category ID
+    suspend fun getDuaNamesByCategory(categoryName: String): Flow<List<DuaName>> {
+        // Find category ID by name
+        val categories = categoryDao.getAllCategories().first()
+        val categoryId = categories.find { it.name == categoryName }?.id?.toString()
+
+        return if (categoryId != null) {
+            duaNameDao.getDuaNamesByCategoryId(categoryId)
+        } else {
+            flowOf(emptyList())
+        }
+    }
 
     suspend fun getDuaNameByGlobalId(globalId: String): DuaName? =
         duaNameDao.getDuaNameByGlobalId(globalId)
 
     fun searchDuaNames(query: String): Flow<List<DuaName>> =
-        duaNameDao.searchDuaNames(query)
+        duaNameDao.searchDuaNamesWithCategoryNames(query)
 
     fun getAllChapterNames(): Flow<List<String>> = duaNameDao.getAllChapterNames()
 
-    // DuaDetail operations: dua_global_id is Int!
+    // DuaDetail operations
     fun getDuaDetailsByGlobalId(globalId: Int): Flow<List<DuaDetail>> =
         duaDetailDao.getDuaDetailsByGlobalId(globalId)
 
@@ -46,12 +55,11 @@ class HisnulMuslimRepository(
 
     // Combined operations
     suspend fun getDuaWithDetails(globalId: Int): Pair<DuaName?, List<DuaDetail>> {
-        // In this context, globalId is likely a chapter name or identifier, but your schema
-        // links dua_details by dua_global_id (Int). If you want to fetch DuaName by chap_id, use getDuaNameByChapId
-        // If you want to fetch DuaName by chapname, use getDuaNameByGlobalId
         val details = duaDetailDao.getDuaDetailsByGlobalId(globalId).first()
-        // If you want to fetch the DuaName by chap_id == globalId
         val duaName = duaNameDao.getDuaNameByGlobalId(globalId.toString())
         return Pair(duaName, details)
     }
+
+    fun getAllDuaDetailsSorted(): Flow<List<DuaDetail>> =
+        duaDetailDao.getAllDuaDetailsSorted()
 }

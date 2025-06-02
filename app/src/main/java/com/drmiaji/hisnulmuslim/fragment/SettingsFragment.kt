@@ -1,9 +1,10 @@
-package com.drmiaji.hisnulmuslim.utils
+package com.drmiaji.hisnulmuslim.fragment
 
 import android.os.Bundle
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import com.drmiaji.hisnulmuslim.R
+import com.drmiaji.hisnulmuslim.utils.ThemeUtils
 
 class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {

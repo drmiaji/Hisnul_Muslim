@@ -29,7 +29,9 @@ object ThemeUtils {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         prefs.edit { putString(KEY_THEME_MODE, mode) }
         applyTheme(context)
-        restartApp(context)
+        if (context is Activity) {
+            context.recreate()
+        }
     }
 
     fun saveThemeModeWithoutRestart(context: Context, mode: String) {
@@ -47,11 +49,5 @@ object ThemeUtils {
     fun getCurrentThemeMode(context: Context): String {
         val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         return prefs.getString(KEY_THEME_MODE, THEME_SYSTEM) ?: THEME_SYSTEM
-    }
-
-    private fun restartApp(context: Context) {
-        val intent = Intent(context, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        context.startActivity(intent)
     }
 }

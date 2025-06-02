@@ -22,4 +22,7 @@ interface DuaDetailDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDuaDetails(duaDetails: List<DuaDetail>)
+
+    @Query("SELECT * FROM duadetails ORDER BY id ASC")
+    fun getAllDuaDetailsSorted(): Flow<List<DuaDetail>>
 }
