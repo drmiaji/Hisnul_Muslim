@@ -16,6 +16,7 @@ import com.drmiaji.hisnulmuslim.data.entities.DuaName
 
 class DuaAdapter(
     private var duaNames: List<DuaName>,
+    private val categoryMap: Map<String, String>, // category id → category name
     private val onItemClick: (DuaName) -> Unit
 ) : RecyclerView.Adapter<DuaAdapter.DuaViewHolder>() {
 
@@ -38,7 +39,9 @@ class DuaAdapter(
             duaNameText.text = highlightSearchQuery(duaName.chapname.toString(), currentQuery)
 
             // Set chapter name with search highlighting
-            chapterNameText.text = highlightSearchQuery(duaName.chapname.toString(), currentQuery)
+            // Use map lookup for category name
+            val catName = categoryMap[duaName.category.orEmpty()] ?: duaName.category.orEmpty()
+            chapterNameText.text = highlightSearchQuery(catName, currentQuery)
 
             // Display chapter.dua numbering
             duaNumberText.text = "${duaName.chap_id}"

@@ -68,15 +68,15 @@ class ChapterListActivity : BaseActivity() {
         )
     }
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView(categoryMap: Map<String, String>) {
         val recyclerView = findViewById<RecyclerView>(R.id.chapter_recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        adapter = DuaAdapter(emptyList()) { duaName ->
+        adapter = DuaAdapter(emptyList(), categoryMap) { duaName ->
             val intent = Intent(this, WebViewActivity::class.java)
-            intent.putExtra("chap_id", duaName.chap_id)                 // pass as Int
-            intent.putExtra("chapter_name", duaName.chapname ?: "")     // pass as String
-            intent.putExtra("title", duaName.chapname) // or whatever title you want
+            intent.putExtra("chap_id", duaName.chap_id)
+            intent.putExtra("chapter_name", duaName.chapname ?: "")
+            intent.putExtra("title", duaName.chapname)
             startActivity(intent)
         }
         recyclerView.adapter = adapter
